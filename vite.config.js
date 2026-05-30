@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/treinos-familia/',
+  base: '/treinos-family/',
   plugins: [
     react(),
     tailwindcss(),
@@ -19,8 +19,8 @@ export default defineConfig({
         background_color: '#0d1b2a',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/treinos-familia/',
-        scope: '/treinos-familia/',
+        start_url: '/treinos-family/',
+        scope: '/treinos-family/',
         icons: [
           {
             src: 'icons/icon-192.png',
