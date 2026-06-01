@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { History, Settings, ChevronRight, Waves, Target } from 'lucide-react'
+import { History, ChevronRight, Waves, Target } from 'lucide-react'
 import { WORKOUTS, JEFF_SCHEDULE, TAG_COLORS } from '../data/workouts'
 import { getRecentSessions } from '../lib/supabase'
 import Avatar from '../components/Avatar'
@@ -193,14 +193,9 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
           >
             ← Trocar perfil
           </button>
-          <div className="flex gap-2">
-            <IconBtn onClick={() => setView('history')} label="Ver histórico">
-              <History size={18} />
-            </IconBtn>
-            <IconBtn onClick={() => setView('settings')} label="Configurações">
-              <Settings size={18} />
-            </IconBtn>
-          </div>
+          <IconBtn onClick={() => setView('history')} label="Ver histórico">
+            <History size={18} />
+          </IconBtn>
         </div>
 
         {/* Profile card */}

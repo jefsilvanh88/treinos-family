@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { Calendar, CheckCircle2, Clock, ChevronUp, ChevronDown } from 'lucide-react'
-import { getRecentSessions, getExerciseLogs } from '../lib/supabase'
+import { useState, useEffect, useRef } from 'react'
+import { Calendar, CheckCircle2, Clock, ChevronUp, ChevronDown, Trash2 } from 'lucide-react'
+import { getRecentSessions, getExerciseLogs, deleteSession } from '../lib/supabase'
 import { WORKOUTS } from '../data/workouts'
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
@@ -8,6 +8,77 @@ const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', '
 function formatDate(dateStr) {
   const [y, m, d] = dateStr.split('-')
   return `${parseInt(d)} ${MONTHS[parseInt(m) - 1]} ${y}`
+}
+
+const SWIPE_THRESHOLD = 72
+const DELETE_WIDTH = 80
+
+function SwipeRow({ children, onDelete }) {
+  const [offsetX, setOffsetX] = useState(0)
+  const [revealed, setRevealed] = useState(false)
+  const startX = useRef(null)
+  const rowRef = useRef(null)
+
+  function onTouchStart(e) {
+    startX.current = e.touches[0].clientX
+  }
+
+  function onTouchMove(e) {
+    if (startX.current === null) return
+    const dx = e.touches[0].clientX - startX.current
+    if (dx > 0 && !revealed) return
+    const base = revealed ? -DELETE_WIDTH : 0
+    const next = Math.max(-DELETE_WIDTH, Math.min(0, base + dx))
+    setOffsetX(next)
+  }
+
+  function onTouchEnd() {
+    startX.current = null
+    if (offsetX < -SWIPE_THRESHOLD) {
+      setOffsetX(-DELETE_WIDTH)
+      setRevealed(true)
+    } else {
+      setOffsetX(0)
+      setRevealed(false)
+    }
+  }
+
+  function handleDelete() {
+    rowRef.current?.animate([{ opacity: 1, transform: 'translateX(0)' }, { opacity: 0, transform: 'translateX(-100%)' }], { duration: 220, easing: 'ease-in', fill: 'forwards' })
+    setTimeout(onDelete, 200)
+  }
+
+  return (
+    <div ref={rowRef} className="relative overflow-hidden rounded-2xl">
+      {/* Delete button behind */}
+      <div
+        className="absolute inset-y-0 right-0 flex items-center justify-center"
+        style={{ width: DELETE_WIDTH, background: '#ef4444' }}
+      >
+        <button
+          onClick={handleDelete}
+          aria-label="Apagar sessão"
+          className="flex flex-col items-center gap-1 w-full h-full justify-center"
+        >
+          <Trash2 size={18} className="text-white" />
+          <span className="text-white text-xs font-ui font-semibold">Apagar</span>
+        </button>
+      </div>
+
+      {/* Swipeable content */}
+      <div
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          transform: `translateX(${offsetX}px)`,
+          transition: startX.current === null ? 'transform 0.25s var(--ease-out)' : 'none',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
 }
 
 export default function History({ profile, onBack }) {
@@ -42,6 +113,12 @@ export default function History({ profile, onBack }) {
     }
   }
 
+  async function handleDelete(sessionId) {
+    setSessions(prev => prev.filter(s => s.id !== sessionId))
+    if (expanded === sessionId) setExpanded(null)
+    try { await deleteSession(sessionId) } catch (e) { console.error(e) }
+  }
+
   return (
     <div
       className="min-h-screen flex flex-col safe-top"
@@ -68,7 +145,7 @@ export default function History({ profile, onBack }) {
               Histórico
             </h1>
             <p className="text-xs font-body" style={{ color: 'var(--text-2)' }}>
-              {profile.name} · últimas sessões
+              {profile.name} · deslize para apagar
             </p>
           </div>
         </div>
@@ -103,98 +180,88 @@ export default function History({ profile, onBack }) {
           const done = !!session.completed_at
 
           return (
-            <div
-              key={session.id}
-              className="rounded-2xl overflow-hidden"
-              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-            >
-              <button
-                onClick={() => toggleSession(session)}
-                aria-expanded={isOpen}
-                aria-label={`${workout?.label || session.workout_key} — ${formatDate(session.date)}`}
-                className="w-full text-left"
-                style={{
-                  minHeight: 64,
-                  transition: 'background 0.15s var(--ease-out)',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-card-hover)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = '' }}
-                onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.99)' }}
-                onPointerUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
-              >
-                <div className="p-4 flex items-center gap-3">
-                  <div
-                    className="flex items-center justify-center shrink-0 rounded-xl"
-                    style={{
-                      width: 40, height: 40,
-                      background: done ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.05)',
-                    }}
-                  >
-                    {done
-                      ? <CheckCircle2 size={20} style={{ color: '#4ade80' }} />
-                      : <Clock size={20} style={{ color: 'var(--text-2)' }} />
+            <SwipeRow key={session.id} onDelete={() => handleDelete(session.id)}>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16 }}>
+                <button
+                  onClick={() => toggleSession(session)}
+                  aria-expanded={isOpen}
+                  aria-label={`${workout?.label || session.workout_key} — ${formatDate(session.date)}`}
+                  className="w-full text-left"
+                  style={{ minHeight: 64, transition: 'background 0.15s var(--ease-out)', borderRadius: isOpen ? '16px 16px 0 0' : 16 }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-card-hover)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '' }}
+                >
+                  <div className="p-4 flex items-center gap-3">
+                    <div
+                      className="flex items-center justify-center shrink-0 rounded-xl"
+                      style={{ width: 40, height: 40, background: done ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.05)' }}
+                    >
+                      {done
+                        ? <CheckCircle2 size={20} style={{ color: '#4ade80' }} />
+                        : <Clock size={20} style={{ color: 'var(--text-2)' }} />
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-ui font-semibold" style={{ color: 'var(--text-0)' }}>
+                        {workout?.label || session.workout_key}
+                      </p>
+                      <p className="text-xs mt-0.5 font-body" style={{ color: 'var(--text-2)' }}>
+                        {formatDate(session.date)}
+                        {' · '}
+                        <span style={{ color: done ? '#4ade80' : 'var(--text-2)' }}>
+                          {done ? 'Concluído' : 'Em andamento'}
+                        </span>
+                      </p>
+                    </div>
+                    {isOpen
+                      ? <ChevronUp size={18} style={{ color: 'var(--text-2)', flexShrink: 0 }} />
+                      : <ChevronDown size={18} style={{ color: 'var(--text-2)', flexShrink: 0 }} />
                     }
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-ui font-semibold" style={{ color: 'var(--text-0)' }}>
-                      {workout?.label || session.workout_key}
-                    </p>
-                    <p className="text-xs mt-0.5 font-body" style={{ color: 'var(--text-2)' }}>
-                      {formatDate(session.date)}
-                      {' · '}
-                      <span style={{ color: done ? '#4ade80' : 'var(--text-2)' }}>
-                        {done ? 'Concluído' : 'Em andamento'}
-                      </span>
-                    </p>
-                  </div>
-                  {isOpen
-                    ? <ChevronUp size={18} style={{ color: 'var(--text-2)', flexShrink: 0 }} />
-                    : <ChevronDown size={18} style={{ color: 'var(--text-2)', flexShrink: 0 }} />
-                  }
-                </div>
-              </button>
+                </button>
 
-              {isOpen && workout && (
-                <div
-                  className="px-4 pb-4 space-y-1 animate-fade-in"
-                  style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-                >
-                  <p className="text-xs font-ui font-semibold pt-3 mb-2" style={{ color: 'var(--accent)' }}>
-                    Cargas registradas
-                  </p>
-                  {workout.exercises.map((ex, i) => {
-                    const log = logs.find(l => l.exercise_index === i)
-                    return (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between py-2"
-                        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-                      >
-                        <p className="text-sm font-body flex-1 pr-3 leading-snug" style={{ color: 'var(--text-1)' }}>
-                          {ex.name}
-                        </p>
-                        <div className="flex items-center gap-3 shrink-0">
-                          {log ? (
-                            <>
-                              <span className="text-xs font-body" style={{ color: 'var(--text-2)' }}>
-                                {log.sets_done}/{ex.sets} séries
-                              </span>
-                              {log.load_kg && (
-                                <span className="text-xs font-ui font-semibold" style={{ color: 'var(--accent)' }}>
-                                  {log.load_kg} kg
+                {isOpen && workout && (
+                  <div
+                    className="px-4 pb-4 space-y-1 animate-fade-in"
+                    style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+                  >
+                    <p className="text-xs font-ui font-semibold pt-3 mb-2" style={{ color: 'var(--accent)' }}>
+                      Cargas registradas
+                    </p>
+                    {workout.exercises.map((ex, i) => {
+                      const log = logs.find(l => l.exercise_index === i)
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between py-2"
+                          style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                        >
+                          <p className="text-sm font-body flex-1 pr-3 leading-snug" style={{ color: 'var(--text-1)' }}>
+                            {ex.name}
+                          </p>
+                          <div className="flex items-center gap-3 shrink-0">
+                            {log ? (
+                              <>
+                                <span className="text-xs font-body" style={{ color: 'var(--text-2)' }}>
+                                  {log.sets_done}/{ex.sets} séries
                                 </span>
-                              )}
-                            </>
-                          ) : (
-                            <span className="text-xs font-body" style={{ color: 'var(--text-2)', opacity: 0.5 }}>—</span>
-                          )}
+                                {log.load_kg && (
+                                  <span className="text-xs font-ui font-semibold" style={{ color: 'var(--accent)' }}>
+                                    {log.load_kg} kg
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-xs font-body" style={{ color: 'var(--text-2)', opacity: 0.5 }}>—</span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </SwipeRow>
           )
         })}
       </div>

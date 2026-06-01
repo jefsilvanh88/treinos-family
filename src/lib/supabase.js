@@ -106,6 +106,12 @@ export async function getExerciseLogs(sessionId) {
   return data
 }
 
+export async function deleteSession(sessionId) {
+  if (!supabase) return
+  const { error } = await supabase.from('workout_sessions').delete().eq('id', sessionId)
+  if (error) throw error
+}
+
 export async function upsertExerciseLog(sessionId, exerciseIndex, setsDone, loadKg) {
   if (!supabase || String(sessionId).startsWith('local-')) return
 

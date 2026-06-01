@@ -82,95 +82,37 @@ const jeffWorkouts = {
   },
 }
 
-// Nicole — ABCD Preservação muscular / Retorno
-const nicoleWorkouts = {
+// Nicole + Jô — ABCD compartilhado (treinam juntas)
+// Sem barra nas costas, face pull obrigatório em A, funcional em C, hip thrust 4x em D
+const grupoWorkouts = {
   treino_a: {
     key: 'treino_a',
     label: 'Treino A',
     focus: 'Peito, Ombros e Tríceps',
     tag: 'Push',
-    goal: 'Reativar os músculos empurradores com intensidade controlada (RIR 3, longe da falha). Prioridade em reaprender o padrão de movimento com halteres, preservando as articulações na retomada.',
+    goal: 'Ativar os músculos empurradores com intensidade controlada. Face pull obrigatório ao final para saúde do ombro.',
     exercises: [
-      { name: 'Supino com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Banco reto, halteres na altura do peito, empurre para cima.' },
-      { name: 'Supino inclinado com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Banco a ~30°, controle a descida em 2 s.' },
-      { name: 'Desenvolvimento sentado com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Cotovelos a 90° na posição inicial, empurre para cima.' },
-      { name: 'Elevação lateral', sets: 3, reps: '12–15', rest: 60, tip: 'Leve inclinação para frente, cotovelos levemente flexionados.' },
-      { name: 'Tríceps na corda (polia)', sets: 3, reps: '12–15', rest: 60, tip: 'Cotovelos fixos, separe as mãos embaixo.' },
+      { name: 'Supino com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Banco reto, halteres na altura do peito. Controle a descida em 2 s — não solte rápido.' },
+      { name: 'Supino inclinado com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Banco a ~30°. Desça até sentir o alongamento no peitoral, empurre para cima sem trancar os cotovelos.' },
+      { name: 'Desenvolvimento com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Sentada, cotovelos a 90° na posição inicial. Empurre até quase travar, desça controlado.' },
+      { name: 'Elevação lateral', sets: 3, reps: '12–15', rest: 60, tip: 'Leve inclinação para frente, cotovelos com leve flexão. Suba até a altura do ombro — sem balanço.' },
+      { name: 'Tríceps na corda (polia)', sets: 3, reps: '12–15', rest: 60, tip: 'Cotovelos fixos ao lado do corpo. Separe as mãos embaixo e controle a subida.' },
+      { name: 'Face pull', sets: 3, reps: '15', rest: 45, tip: 'Polia na altura do rosto, puxe até as orelhas com cotovelos altos. Protege o manguito rotador — não pule esse!' },
     ],
   },
   treino_b: {
     key: 'treino_b',
     label: 'Treino B',
-    focus: 'Costas e Bíceps',
+    focus: 'Costas, Bíceps e Core',
     tag: 'Pull',
-    goal: 'Fortalecer a cadeia posterior do tronco e melhorar postura. Volume moderado em puxadas e remadas para recuperar a massa de costas sem sobrecarregar a coluna. Face pull fecha o treino protegendo os ombros.',
+    goal: 'Fortalecer a cadeia posterior do tronco, melhorar postura e construir core. Base de estabilidade para todos os movimentos.',
     exercises: [
-      { name: 'Puxada alta na máquina', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada um pouco mais larga que os ombros, puxe até o peito.' },
-      { name: 'Remada baixa sentado (cabo)', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada neutra, puxe até o umbigo.' },
-      { name: 'Remada unilateral com haltere', sets: 3, reps: '10–12', rest: 90, tip: 'Joelho e mão no banco, puxe o cotovelo para o bolso.' },
-      { name: 'Rosca alternada com halteres', sets: 3, reps: '12–15', rest: 60, tip: 'Gire o pulso ao subir, controle a descida.' },
-      { name: 'Face pull', sets: 3, reps: '15', rest: 45, tip: 'Polia na altura do rosto, cotovelos altos.' },
-    ],
-  },
-  treino_c: {
-    key: 'treino_c',
-    label: 'Treino C',
-    focus: 'Pernas 1 — Quadríceps e Core',
-    tag: 'Legs',
-    goal: 'Recuperar força e tônus nos quadríceps com exercícios seguros (sem carga axial pesada). Goblet e leg press permitem boa ativação sem risco na coluna. Core ao final para estabilidade geral.',
-    exercises: [
-      { name: 'Agachamento goblet (halter)', sets: 3, reps: '12–15', rest: 90, tip: 'Segure o halter no peito, pés na largura dos ombros.' },
-      { name: 'Leg press', sets: 3, reps: '12–15', rest: 90, tip: 'Não trave os joelhos, amplitude controlada.' },
-      { name: 'Cadeira extensora', sets: 3, reps: '15', rest: 60, tip: 'Controle a fase excêntrica (2–3 s).' },
-      { name: 'Panturrilha em pé', sets: 3, reps: '15', rest: 45, tip: 'Amplitude completa, suba e desça devagar.' },
-      { name: 'Prancha abdominal', sets: 3, reps: '30 s', rest: 45, tip: 'Quadril alinhado, respire normalmente.' },
-    ],
-  },
-  treino_d: {
-    key: 'treino_d',
-    label: 'Treino D',
-    focus: 'Pernas 2 — Glúteos e Posterior',
-    tag: 'Glutes',
-    goal: 'Ativar e tonificar glúteos e isquiotibiais — cadeia frequentemente subutilizada no dia a dia. Hip thrust é o exercício principal. Avanço e abdução completam o estímulo multi-angular do glúteo.',
-    exercises: [
-      { name: 'Hip thrust / Elevação pélvica', sets: 3, reps: '12–15', rest: 90, tip: 'Ombros no banco, quadril sobe até a linha do joelho.' },
-      { name: 'Stiff com halteres', sets: 3, reps: '12–15', rest: 90, tip: 'Quadril para trás, joelhos levemente flexionados.' },
-      { name: 'Mesa flexora', sets: 3, reps: '12–15', rest: 60, tip: 'Controle a descida, não solte rápido.' },
-      { name: 'Avanço com halteres', sets: 3, reps: '12/lado', rest: 90, tip: 'Passo largo, joelho da frente não passa do pé.' },
-      { name: 'Abdução de quadril na máquina', sets: 3, reps: '15', rest: 45, tip: 'Controle a fase de retorno.' },
-    ],
-  },
-}
-
-// Jô — ABCD Atleta de Vôlei (12–14 anos)
-const joWorkouts = {
-  treino_a: {
-    key: 'treino_a',
-    label: 'Treino A',
-    focus: 'Empurrar + Saúde do Ombro',
-    tag: 'Push',
-    goal: 'Desenvolver força empurradora para o ataque no vôlei e blindar o ombro contra lesões. O face pull é obrigatório: equilibra os rotadores e compensa o volume de arremesso dos treinos de quadra.',
-    exercises: [
-      { name: 'Supino com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Banco reto, controle o movimento.' },
-      { name: 'Desenvolvimento com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Sentada, cotovelos a 90° na posição inicial.' },
-      { name: 'Elevação lateral', sets: 3, reps: '12–15', rest: 60, tip: 'Leve inclinação, cotovelos flexionados.' },
-      { name: 'Tríceps na corda', sets: 3, reps: '10–12', rest: 60, tip: 'Cotovelos fixos ao lado do corpo.' },
-      { name: 'Face pull', sets: 3, reps: '15', rest: 45, tip: 'Essencial para saúde do ombro — não pule!' },
-    ],
-  },
-  treino_b: {
-    key: 'treino_b',
-    label: 'Treino B',
-    focus: 'Costas e Core',
-    tag: 'Pull',
-    goal: 'Fortalecer a cadeia posterior do tronco e o core — base de estabilidade para todos os movimentos do vôlei. Puxadas e remadas melhoram a postura e compensam o desequilíbrio gerado pelo saque e ataque.',
-    exercises: [
-      { name: 'Puxada alta na máquina', sets: 3, reps: '8–10', rest: 90, tip: 'Pegada na largura dos ombros, puxe até o peito.' },
-      { name: 'Remada baixa sentado (cabo)', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada neutra, escápulas no final.' },
-      { name: 'Remada unilateral com haltere', sets: 3, reps: '10–12', rest: 60, tip: 'Costas retas, puxe o cotovelo para cima.' },
-      { name: 'Rosca direta com halteres', sets: 3, reps: '10–12', rest: 60, tip: 'Cotovelos fixos, controle a descida.' },
-      { name: 'Prancha abdominal', sets: 3, reps: '30–45 s', rest: 45, tip: 'Quadril neutro, não deixe afundar.' },
-      { name: 'Elevação de pernas', sets: 3, reps: '12', rest: 45, tip: 'Lombar colada no banco, suba as pernas retas.' },
+      { name: 'Puxada alta na máquina', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada um pouco mais larga que os ombros. Puxe até o peito alto, controle a subida.' },
+      { name: 'Remada baixa sentado (cabo)', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada neutra, puxe até o umbigo. Junte as escápulas no final do movimento.' },
+      { name: 'Remada unilateral com haltere', sets: 3, reps: '10–12', rest: 90, tip: 'Joelho e mão apoiados no banco. Costas retas, puxe o cotovelo para o bolso.' },
+      { name: 'Rosca alternada com halteres', sets: 3, reps: '12–15', rest: 60, tip: 'Cotovelos fixos ao lado do corpo. Gire o pulso ao subir (supinação), controle a descida em 2 s.' },
+      { name: 'Prancha abdominal', sets: 3, reps: '30–45 s', rest: 45, tip: 'Quadril alinhado com o corpo — nem levantado nem caído. Respire normalmente.' },
+      { name: 'Elevação de pernas', sets: 3, reps: '12', rest: 45, tip: 'Lombar colada no banco, suba as pernas retas até 90°. Desça sem bater.' },
     ],
   },
   treino_c: {
@@ -178,30 +120,33 @@ const joWorkouts = {
     label: 'Treino C',
     focus: 'Pernas 1 — Quadríceps e Funcional',
     tag: 'Legs',
-    goal: 'Construir força de quadríceps e controle de movimento para saltos, bloqueios e mudanças de direção. Avanço treina estabilidade unilateral — habilidade crítica na quadra. Panturrilha forte reduz risco de entorse.',
+    goal: 'Força de quadríceps e controle unilateral. Avanço treina estabilidade e equilíbrio — habilidade essencial no dia a dia e no esporte.',
     exercises: [
-      { name: 'Agachamento goblet (halter)', sets: 3, reps: '10–12', rest: 120, tip: 'Segure o halter no peito, boa profundidade.' },
-      { name: 'Leg press', sets: 3, reps: '10–12', rest: 120, tip: 'Amplitude controlada, não trave os joelhos.' },
-      { name: 'Avanço com halteres', sets: 3, reps: '10/lado', rest: 90, tip: 'Passo largo, controle o tronco.' },
-      { name: 'Cadeira extensora', sets: 3, reps: '12–15', rest: 60, tip: 'Fase excêntrica de 2–3 s.' },
-      { name: 'Panturrilha em pé', sets: 3, reps: '15', rest: 45, tip: 'Amplitude completa para base de salto.' },
+      { name: 'Agachamento goblet (halter)', sets: 3, reps: '12–15', rest: 90, tip: 'Segure o halter no peito com as duas mãos. Pés na largura dos ombros, desça até a paralela.' },
+      { name: 'Leg press', sets: 3, reps: '12–15', rest: 90, tip: 'Amplitude controlada. Não trave os joelhos no topo, pés na largura dos ombros.' },
+      { name: 'Avanço com halteres', sets: 3, reps: '12/lado', rest: 90, tip: 'Passo largo, joelho de trás quase toca o chão. Tronco ereto, joelho da frente não passa do pé.' },
+      { name: 'Cadeira extensora', sets: 3, reps: '15', rest: 60, tip: 'Controle a fase excêntrica (2–3 s na descida). Não solte rápido.' },
+      { name: 'Panturrilha em pé', sets: 3, reps: '15', rest: 45, tip: 'Amplitude completa — sobe até a ponta máxima, desce abaixo da plataforma.' },
     ],
   },
   treino_d: {
     key: 'treino_d',
     label: 'Treino D',
-    focus: 'Pernas 2 — Glúteos e Base de Salto',
+    focus: 'Pernas 2 — Glúteos e Posterior',
     tag: 'Glutes',
-    goal: 'Maximizar a potência do salto vertical — o ativo mais importante no vôlei. Glúteos fortes geram força propulsiva; isquiotibiais absorvem o impacto da aterrissagem. Hip thrust com 4 séries é o foco principal.',
+    goal: 'Glúteos e isquiotibiais — cadeia posterior completa. Hip thrust é o principal; os demais complementam e equilibram.',
     exercises: [
-      { name: 'Hip thrust / Elevação pélvica', sets: 4, reps: '10–12', rest: 90, tip: 'Fundamental para potência no salto — foco na contração.' },
-      { name: 'Stiff com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Quadril para trás, coluna neutra.' },
-      { name: 'Mesa flexora', sets: 3, reps: '10–12', rest: 60, tip: 'Controle a fase de retorno.' },
-      { name: 'Abdução de quadril na máquina', sets: 3, reps: '15', rest: 45, tip: 'Movimento controlado, não jogue a perna.' },
-      { name: 'Agachamento sumô com halter', sets: 3, reps: '12', rest: 90, tip: 'Pés bem abertos, ponta dos pés para fora, desça fundo.' },
+      { name: 'Hip thrust / Elevação pélvica', sets: 4, reps: '10–12', rest: 90, tip: 'Ombros apoiados no banco. Suba o quadril até formar linha reta com os joelhos. Contraia o glúteo no topo por 1 s.' },
+      { name: 'Stiff com halteres', sets: 3, reps: '12–15', rest: 90, tip: 'Quadril para trás, joelhos levemente flexionados, coluna neutra. Desça até sentir o alongamento nos isquiotibiais.' },
+      { name: 'Mesa flexora', sets: 3, reps: '12–15', rest: 60, tip: 'Controle a fase excêntrica — não solte rápido. Flexione até 90° ou o máximo confortável.' },
+      { name: 'Agachamento sumô com halter', sets: 3, reps: '12', rest: 90, tip: 'Pés bem abertos, pontas para fora. Segure o halter pendurado entre as pernas, desça fundo.' },
+      { name: 'Abdução de quadril na máquina', sets: 3, reps: '15', rest: 45, tip: 'Movimento controlado — não jogue a perna. Controle a fase de retorno.' },
     ],
   },
 }
+
+const nicoleWorkouts = grupoWorkouts
+const joWorkouts = grupoWorkouts
 
 export const WORKOUTS = {
   jeff: jeffWorkouts,
