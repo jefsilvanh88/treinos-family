@@ -124,7 +124,7 @@ const grupoWorkouts = {
     exercises: [
       { name: 'Agachamento goblet (halter)', sets: 3, reps: '12–15', rest: 90, tip: 'Segure o halter no peito com as duas mãos. Pés na largura dos ombros, desça até a paralela.' },
       { name: 'Leg press', sets: 3, reps: '12–15', rest: 90, tip: 'Amplitude controlada. Não trave os joelhos no topo, pés na largura dos ombros.' },
-      { name: 'Avanço com halteres', sets: 3, reps: '12/lado', rest: 90, tip: 'Passo largo, joelho de trás quase toca o chão. Tronco ereto, joelho da frente não passa do pé.' },
+      { name: 'Cadeira adutora', sets: 3, reps: '15', rest: 60, tip: 'Controle a fase de abertura (excêntrica). Não deixe o peso abrir rápido — o retorno lento é onde o músculo trabalha.' },
       { name: 'Cadeira extensora', sets: 3, reps: '15', rest: 60, tip: 'Controle a fase excêntrica (2–3 s na descida). Não solte rápido.' },
       { name: 'Panturrilha em pé', sets: 3, reps: '15', rest: 45, tip: 'Amplitude completa — sobe até a ponta máxima, desce abaixo da plataforma.' },
     ],

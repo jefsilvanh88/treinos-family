@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { CheckCircle2, Trophy } from 'lucide-react'
+import { CheckCircle2, Trophy, Plus } from 'lucide-react'
 import { TAG_COLORS } from '../data/workouts'
 import { getOrCreateSession, getExerciseLogs, upsertExerciseLog, completeSession } from '../lib/supabase'
 import ExerciseCard from '../components/ExerciseCard'
@@ -50,44 +50,76 @@ export default function WorkoutSession({ profile, workout, onBack }) {
   if (finished) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center px-6 safe-top safe-bottom"
+        className="min-h-screen flex flex-col safe-top"
         style={{ background: 'linear-gradient(160deg, var(--bg-1) 0%, var(--bg-0) 100%)' }}
       >
+        {/* Header */}
         <div
-          className="flex items-center justify-center mb-6 rounded-full"
-          style={{
-            width: 88, height: 88,
-            background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-            boxShadow: '0 0 48px rgba(34,197,94,0.35)',
-          }}
+          className="px-5 pt-5 pb-4 sticky top-0 z-10"
+          style={{ background: 'rgba(10,20,35,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
         >
-          <Trophy size={42} className="text-white" />
+          <button
+            onClick={onBack}
+            className="font-body text-sm mb-3 block"
+            style={{ color: 'var(--text-1)', minHeight: 44, display: 'flex', alignItems: 'center' }}
+          >
+            ← Voltar
+          </button>
+          <div className="flex items-center gap-3">
+            <div
+              className="flex items-center justify-center shrink-0 rounded-full"
+              style={{ width: 44, height: 44, background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 0 24px rgba(34,197,94,0.4)' }}
+            >
+              <Trophy size={22} className="text-white" />
+            </div>
+            <div>
+              <h1 className="font-display font-bold text-2xl text-white" style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+                Treino concluído!
+              </h1>
+              <p className="text-xs font-body mt-0.5" style={{ color: 'var(--text-2)' }}>
+                {workout.label} · {completedEx}/{totalExercises} exercícios
+              </p>
+            </div>
+          </div>
         </div>
-        <h2 className="font-display font-bold text-3xl text-white mb-2" style={{ letterSpacing: '-0.02em' }}>
-          Treino concluído!
-        </h2>
-        <p className="text-center font-body mb-1.5" style={{ color: 'var(--text-1)' }}>
-          {workout.label} · {workout.focus}
-        </p>
-        <p className="text-sm font-body mb-10" style={{ color: 'var(--text-2)' }}>
-          {completedEx}/{totalExercises} exercícios completados
-        </p>
-        <button
-          onClick={onBack}
-          className="font-ui font-semibold text-white rounded-2xl"
-          style={{
-            padding: '14px 36px',
-            background: 'linear-gradient(135deg, var(--accent), #1565d6)',
-            boxShadow: '0 8px 24px rgba(41,121,255,0.4), 0 0 0 1px rgba(41,121,255,0.15)',
-            transition: 'transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out)',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 12px 28px rgba(41,121,255,0.4)' }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(41,121,255,0.35)' }}
-          onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.97)' }}
-          onPointerUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+
+        {/* Exercise summary — read-only */}
+        <div className="flex-1 px-4 py-4 space-y-3 overflow-y-auto" style={{ paddingBottom: 120, overscrollBehavior: 'contain' }}>
+          {workout.exercises.map((ex, i) => (
+            <div key={i} className="animate-slide-up" style={{ animationDelay: `${i * 0.03}s` }}>
+              <ExerciseCard
+                exercise={ex}
+                index={i}
+                sessionId={sessionId}
+                log={logs[i]}
+                onLogChange={() => {}}
+                readOnly
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Novo treino CTA */}
+        <div
+          className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-5 pb-6 safe-bottom"
+          style={{ background: 'linear-gradient(0deg, var(--bg-0) 60%, transparent)' }}
         >
-          Voltar ao dashboard
-        </button>
+          <button
+            onClick={onBack}
+            className="w-full font-ui font-bold text-white text-base rounded-2xl flex items-center justify-center gap-2"
+            style={{
+              padding: '16px',
+              background: 'linear-gradient(135deg, var(--accent), #1565d6)',
+              boxShadow: '0 8px 24px rgba(41,121,255,0.4), 0 0 0 1px rgba(41,121,255,0.15)',
+              transition: 'transform 0.15s var(--ease-out)',
+            }}
+            onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.98)' }}
+            onPointerUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+          >
+            <Plus size={20} strokeWidth={2.5} />
+            Novo treino
+          </button>
+        </div>
       </div>
     )
   }

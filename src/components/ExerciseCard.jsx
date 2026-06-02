@@ -1,25 +1,20 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Check } from 'lucide-react'
-import RestTimer from './RestTimer'
-import { useRestTimer } from '../hooks/useRestTimer'
 
-export default function ExerciseCard({ exercise, index, sessionId, log, onLogChange }) {
+export default function ExerciseCard({ exercise, index, sessionId, log, onLogChange, readOnly = false }) {
   const [expanded, setExpanded] = useState(false)
   const [animatingSet, setAnimatingSet] = useState(null)
-  const timer = useRestTimer()
 
   const setsDone = log?.sets_done ?? 0
   const loadKg   = log?.load_kg  ?? ''
   const allDone  = setsDone >= exercise.sets
 
   function handleSetToggle(setIdx) {
+    if (readOnly) return
     const newSetsDone = setIdx < setsDone ? setIdx : setIdx + 1
     setAnimatingSet(setIdx)
     setTimeout(() => setAnimatingSet(null), 280)
     onLogChange(index, newSetsDone, loadKg || null)
-    if (newSetsDone > setsDone && newSetsDone < exercise.sets) {
-      timer.start(exercise.rest)
-    }
   }
 
   function handleLoad(e) {
@@ -55,7 +50,7 @@ export default function ExerciseCard({ exercise, index, sessionId, log, onLogCha
               {exercise.name}
             </p>
             <p className="text-xs mt-0.5 font-body" style={{ color: 'var(--text-1)' }}>
-              {exercise.sets} séries · {exercise.reps} reps · {exercise.rest}s descanso
+              {exercise.sets} séries · {exercise.reps} reps
             </p>
           </div>
           <button
@@ -103,6 +98,7 @@ export default function ExerciseCard({ exercise, index, sessionId, log, onLogCha
               placeholder="0"
               min="0"
               step="0.5"
+              readOnly={readOnly}
               aria-label="Carga em kg"
               className="font-ui font-semibold text-center bg-transparent outline-none rounded-xl"
               style={{
@@ -117,18 +113,6 @@ export default function ExerciseCard({ exercise, index, sessionId, log, onLogCha
           </div>
         </div>
 
-        {/* Timer — running */}
-        {(timer.running || timer.seconds > 0) && (
-          <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.25)' }}>
-            <RestTimer {...timer} restSeconds={exercise.rest} />
-          </div>
-        )}
-        {/* Timer — idle button */}
-        {!timer.running && timer.seconds === 0 && setsDone > 0 && !allDone && (
-          <div className="mt-2">
-            <RestTimer {...timer} restSeconds={exercise.rest} />
-          </div>
-        )}
       </div>
 
       {/* Tip */}

@@ -256,7 +256,7 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
           </div>
         )}
 
-        {profile.key === 'jeff' ? renderJeffSchedule() : renderFreeList()}
+        {renderFreeList()}
       </div>
     </div>
   )
