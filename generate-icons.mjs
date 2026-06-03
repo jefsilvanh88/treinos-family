@@ -1,71 +1,35 @@
-// node generate-icons.mjs — no external deps
-import { createWriteStream, mkdirSync } from 'fs'
-import zlib from 'zlib'
-
-function uint32BE(n) {
-  const b = Buffer.alloc(4)
-  b.writeUInt32BE(n)
-  return b
-}
-
-function crc32(buf) {
-  let crc = 0xffffffff
-  const table = []
-  for (let i = 0; i < 256; i++) {
-    let c = i
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1
-    table[i] = c
-  }
-  for (const byte of buf) crc = table[(crc ^ byte) & 0xff] ^ (crc >>> 8)
-  return (crc ^ 0xffffffff) >>> 0
-}
-
-function chunk(type, data) {
-  const typeBuf = Buffer.from(type)
-  const crcBuf = crc32(Buffer.concat([typeBuf, data]))
-  return Buffer.concat([uint32BE(data.length), typeBuf, data, uint32BE(crcBuf)])
-}
-
-function makePng(size, r, g, b) {
-  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
-
-  const ihdr = Buffer.concat([
-    uint32BE(size), uint32BE(size),
-    Buffer.from([8, 2, 0, 0, 0]) // bit depth 8, RGB, deflate, no filter, no interlace
-  ])
-
-  // Build raw scanlines with filter byte 0 (None) per row
-  const raw = Buffer.alloc(size * (1 + size * 3))
-  for (let y = 0; y < size; y++) {
-    const offset = y * (1 + size * 3)
-    raw[offset] = 0 // filter type None
-    for (let x = 0; x < size; x++) {
-      // Dumbbell-style gradient: orange circle on dark bg
-      const cx = x - size / 2, cy = y - size / 2
-      const dist = Math.sqrt(cx * cx + cy * cy)
-      const radius = size * 0.35
-      const inCircle = dist < radius
-      const px = offset + 1 + x * 3
-      if (inCircle) {
-        raw[px] = 0xe8; raw[px + 1] = 0x54; raw[px + 2] = 0x2f // orange #e8542f
-      } else {
-        raw[px] = 0x1a; raw[px + 1] = 0x2b; raw[px + 2] = 0x4a // navy #1a2b4a
-      }
-    }
-  }
-
-  const compressed = zlib.deflateSync(raw)
-  const idat = chunk('IDAT', compressed)
-  const iend = chunk('IEND', Buffer.alloc(0))
-
-  return Buffer.concat([signature, chunk('IHDR', ihdr), idat, iend])
-}
+// node generate-icons.mjs — generates PWA icons with dumbbell via sharp
+import sharp from 'sharp'
+import { mkdirSync } from 'fs'
 
 mkdirSync('public/icons', { recursive: true })
+
+function makeSvg(size) {
+  const pad = size * 0.18
+  const scale = (size - pad * 2) / 24
+  const strokeW = size * 0.065
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a3a8f"/>
+      <stop offset="100%" stop-color="#2979ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="${size}" height="${size}" rx="${size * 0.22}" ry="${size * 0.22}" fill="url(#bg)"/>
+  <g transform="translate(${pad}, ${pad}) scale(${scale})"
+     fill="none" stroke="white" stroke-width="${strokeW / scale}"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/>
+    <path d="m2.5 21.5 1.4-1.4"/>
+    <path d="m20.1 3.9 1.4-1.4"/>
+    <path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/>
+    <path d="m9.6 14.4 4.8-4.8"/>
+  </g>
+</svg>`
+}
+
 for (const size of [192, 512]) {
-  const buf = makePng(size)
-  const ws = createWriteStream(`public/icons/icon-${size}.png`)
-  ws.write(buf)
-  ws.end()
-  console.log(`Generated icon-${size}.png (${size}×${size})`)
+  await sharp(Buffer.from(makeSvg(size))).png().toFile(`public/icons/icon-${size}.png`)
+  console.log(`✓ icon-${size}.png`)
 }
