@@ -58,7 +58,7 @@ const jeffWorkouts = {
       { name: 'Puxada na polia, pegada neutra', sets: 3, reps: '12', rest: 60, tip: 'Puxe até o peito alto, controle a subida.' },
       { name: 'Rosca direta com barra', sets: 4, reps: '8–10', rest: 60, tip: 'Cotovelos fixos, suba em 1 s, desça em 2 s.' },
       { name: 'Rosca alternada com halteres', sets: 3, reps: '10–12', rest: 60, tip: 'Gire o pulso ao subir (supinação), controle a descida.' },
-      { name: 'Rosca martelo', sets: 3, reps: '12–15', rest: 60, tip: 'Polegar para cima, sem girar o pulso.' },
+      { name: 'Rosca martelo', sets: 3, reps: '12–15', rest: 60, tip: 'Polegar para cima, sem girar o pulso. Cotovelos fixos ao lado do corpo, controle a descida.' },
       { name: 'Face pull (saúde do ombro)', sets: 3, reps: '15', rest: 45, tip: 'Polia na altura do rosto, puxe até as orelhas, cotovelos altos.' },
     ],
   },
