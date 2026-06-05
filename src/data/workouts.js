@@ -83,44 +83,30 @@ const jeffWorkouts = {
 }
 
 // Nicole + Jô — ABCD compartilhado (treinam juntas)
-// Sem barra nas costas, face pull obrigatório em A, funcional em C, hip thrust 4x em D
+// Ordem: Superior / Inferior / Superior / Inferior
 const grupoWorkouts = {
   treino_a: {
     key: 'treino_a',
     label: 'Treino A',
     focus: 'Peito, Ombros e Tríceps',
     tag: 'Push',
-    goal: 'Ativar os músculos empurradores com intensidade controlada. Face pull obrigatório ao final para saúde do ombro.',
+    goal: 'Superior empurrador. Voador isola o peitoral sem carga axial; elevação frontal complementa o deltóide anterior.',
     exercises: [
       { name: 'Supino com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Banco reto, halteres na altura do peito. Controle a descida em 2 s — não solte rápido.' },
-      { name: 'Supino inclinado com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Banco a ~30°. Desça até sentir o alongamento no peitoral, empurre para cima sem trancar os cotovelos.' },
+      { name: 'Voador (peck deck)', sets: 3, reps: '12–15', rest: 60, tip: 'Leve flexão nos cotovelos, mantida durante todo o movimento. Controle a abertura — não deixe os braços irem além do plano do ombro.' },
       { name: 'Desenvolvimento com halteres', sets: 3, reps: '10–12', rest: 90, tip: 'Sentada, cotovelos a 90° na posição inicial. Empurre até quase travar, desça controlado.' },
       { name: 'Elevação lateral', sets: 3, reps: '12–15', rest: 60, tip: 'Leve inclinação para frente, cotovelos com leve flexão. Suba até a altura do ombro — sem balanço.' },
+      { name: 'Elevação frontal com halteres', sets: 3, reps: '12–15', rest: 60, tip: 'Braços paralelos ao chão no topo. Cotovelos levemente flexionados — suba um braço de cada vez ou os dois juntos.' },
       { name: 'Tríceps na corda (polia)', sets: 3, reps: '12–15', rest: 60, tip: 'Cotovelos fixos ao lado do corpo. Separe as mãos embaixo e controle a subida.' },
-      { name: 'Face pull', sets: 3, reps: '15', rest: 45, tip: 'Polia na altura do rosto, puxe até as orelhas com cotovelos altos. Protege o manguito rotador — não pule esse!' },
+      { name: 'Tríceps testa com barra (skull crusher)', sets: 3, reps: '10–12', rest: 60, tip: 'Cotovelos apontados para o teto, desça a barra até a testa. Mantenha os cotovelos fixos — não deixe abrir.' },
     ],
   },
   treino_b: {
     key: 'treino_b',
     label: 'Treino B',
-    focus: 'Costas, Bíceps e Core',
-    tag: 'Pull',
-    goal: 'Fortalecer a cadeia posterior do tronco, melhorar postura e construir core. Base de estabilidade para todos os movimentos.',
-    exercises: [
-      { name: 'Puxada alta na máquina', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada um pouco mais larga que os ombros. Puxe até o peito alto, controle a subida.' },
-      { name: 'Remada baixa sentado (cabo)', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada neutra, puxe até o umbigo. Junte as escápulas no final do movimento.' },
-      { name: 'Remada unilateral com haltere', sets: 3, reps: '10–12', rest: 90, tip: 'Joelho e mão apoiados no banco. Costas retas, puxe o cotovelo para o bolso.' },
-      { name: 'Rosca alternada com halteres', sets: 3, reps: '12–15', rest: 60, tip: 'Cotovelos fixos ao lado do corpo. Gire o pulso ao subir (supinação), controle a descida em 2 s.' },
-      { name: 'Prancha abdominal', sets: 3, reps: '30–45 s', rest: 45, tip: 'Quadril alinhado com o corpo — nem levantado nem caído. Respire normalmente.' },
-      { name: 'Elevação de pernas', sets: 3, reps: '12', rest: 45, tip: 'Lombar colada no banco, suba as pernas retas até 90°. Desça sem bater.' },
-    ],
-  },
-  treino_c: {
-    key: 'treino_c',
-    label: 'Treino C',
-    focus: 'Pernas 1 — Quadríceps e Funcional',
+    focus: 'Pernas — Quadríceps e Adutores',
     tag: 'Legs',
-    goal: 'Força de quadríceps e controle unilateral. Avanço treina estabilidade e equilíbrio — habilidade essencial no dia a dia e no esporte.',
+    goal: 'Inferior quadríceps. Cadeira adutora fecha o estímulo medial e fortalece a virilha.',
     exercises: [
       { name: 'Agachamento goblet (halter)', sets: 3, reps: '12–15', rest: 90, tip: 'Segure o halter no peito com as duas mãos. Pés na largura dos ombros, desça até a paralela.' },
       { name: 'Leg press', sets: 3, reps: '12–15', rest: 90, tip: 'Amplitude controlada. Não trave os joelhos no topo, pés na largura dos ombros.' },
@@ -129,12 +115,28 @@ const grupoWorkouts = {
       { name: 'Panturrilha em pé', sets: 3, reps: '15', rest: 45, tip: 'Amplitude completa — sobe até a ponta máxima, desce abaixo da plataforma.' },
     ],
   },
+  treino_c: {
+    key: 'treino_c',
+    label: 'Treino C',
+    focus: 'Costas, Bíceps e Core',
+    tag: 'Pull',
+    goal: 'Superior puxador. Puxada com triângulo — pegada neutra, menos stress no cotovelo, maior amplitude.',
+    exercises: [
+      { name: 'Puxada alta na máquina', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada um pouco mais larga que os ombros. Puxe até o peito alto, controle a subida.' },
+      { name: 'Remada baixa sentado (cabo)', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada neutra, puxe até o umbigo. Junte as escápulas no final do movimento.' },
+      { name: 'Puxada com triângulo (cabo)', sets: 3, reps: '10–12', rest: 90, tip: 'Pegada neutra no triângulo. Puxe até o peito alto, controle a subida em 2 s — não solte rápido.' },
+      { name: 'Rosca alternada com halteres', sets: 3, reps: '12–15', rest: 60, tip: 'Cotovelos fixos ao lado do corpo. Gire o pulso ao subir (supinação), controle a descida em 2 s.' },
+      { name: 'Rosca martelo', sets: 3, reps: '12–15', rest: 60, tip: 'Polegar para cima, sem girar o pulso. Cotovelos fixos ao lado do corpo, controle a descida.' },
+      { name: 'Prancha abdominal', sets: 3, reps: '30–45 s', rest: 45, tip: 'Quadril alinhado com o corpo — nem levantado nem caído. Respire normalmente.' },
+      { name: 'Elevação de pernas', sets: 3, reps: '12', rest: 45, tip: 'Lombar colada no banco, suba as pernas retas até 90°. Desça sem bater.' },
+    ],
+  },
   treino_d: {
     key: 'treino_d',
     label: 'Treino D',
-    focus: 'Pernas 2 — Glúteos e Posterior',
+    focus: 'Pernas — Glúteos e Posterior',
     tag: 'Glutes',
-    goal: 'Glúteos e isquiotibiais — cadeia posterior completa. Hip thrust é o principal; os demais complementam e equilibram.',
+    goal: 'Inferior glúteos. Hip thrust é o principal; os demais completam a cadeia posterior.',
     exercises: [
       { name: 'Hip thrust / Elevação pélvica', sets: 4, reps: '10–12', rest: 90, tip: 'Ombros apoiados no banco. Suba o quadril até formar linha reta com os joelhos. Contraia o glúteo no topo por 1 s.' },
       { name: 'Stiff com halteres', sets: 3, reps: '12–15', rest: 90, tip: 'Quadril para trás, joelhos levemente flexionados, coluna neutra. Desça até sentir o alongamento nos isquiotibiais.' },
