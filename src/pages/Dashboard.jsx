@@ -7,7 +7,68 @@ import History_ from './History'
 import Progress from './Progress'
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+const MONTHS_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 const DAY_FULL = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+
+function MonthActivity({ sessions }) {
+  const today = new Date()
+  const y = today.getFullYear()
+  const m = today.getMonth()
+  const daysInMonth = new Date(y, m + 1, 0).getDate()
+  const todayDay = today.getDate()
+
+  const workedDays = new Set(
+    sessions
+      .filter(s => {
+        const [sy, sm] = s.date.split('-')
+        return +sy === y && +sm === m + 1 && s.completed_at
+      })
+      .map(s => +s.date.split('-')[2])
+  )
+  const count = workedDays.size
+
+  return (
+    <div
+      className="rounded-2xl mb-4"
+      style={{ padding: '14px 16px', background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+    >
+      <div className="flex items-center justify-between mb-2.5">
+        <p className="text-xs font-ui font-semibold" style={{ color: 'var(--text-2)', letterSpacing: '0.07em' }}>
+          {MONTHS_FULL[m].toUpperCase()}
+        </p>
+        <p className="text-xs font-ui font-semibold tabular-nums" style={{ color: count > 0 ? 'var(--accent)' : 'var(--text-2)' }}>
+          {count} treino{count !== 1 ? 's' : ''}
+        </p>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${daysInMonth}, 1fr)`, gap: 3 }}>
+        {Array.from({ length: daysInMonth }, (_, i) => {
+          const d = i + 1
+          const worked = workedDays.has(d)
+          const isToday = d === todayDay
+          const isFuture = d > todayDay
+          return (
+            <div
+              key={d}
+              title={`${d} ${MONTHS[m]}`}
+              style={{
+                aspectRatio: '1',
+                borderRadius: 3,
+                background: worked
+                  ? 'var(--accent)'
+                  : isFuture
+                    ? 'rgba(255,255,255,0.02)'
+                    : 'rgba(255,255,255,0.07)',
+                outline: isToday && !worked ? '1.5px solid var(--accent-border)' : 'none',
+                boxShadow: worked ? '0 1px 6px rgba(41,121,255,0.4)' : 'none',
+                transition: 'background 0.2s',
+              }}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 function formatDate(d) { return `${d.getDate()} de ${MONTHS[d.getMonth()]}` }
 
@@ -78,13 +139,14 @@ function WorkoutCard({ workout, onClick, left, isToday }) {
 export default function Dashboard({ profile, onStartWorkout, onBack }) {
   const [view, setView] = useState('dashboard')
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url)
+  const [sessions, setSessions] = useState([])
   const today = new Date()
   const todayDow = today.getDay()
 
   const workouts = WORKOUTS[profile.key] || {}
 
   useEffect(() => {
-    getRecentSessions(profile.id, 1).catch(() => {})
+    getRecentSessions(profile.id, 60).then(setSessions).catch(() => {})
   }, [profile.id])
 
   function renderJeffSchedule() {
@@ -235,6 +297,9 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
 
       {/* Content */}
       <div className="flex-1 px-5 pb-8 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
+
+        {/* Month activity */}
+        <MonthActivity sessions={sessions} />
 
         {/* Objective */}
         {profile.objective && (
