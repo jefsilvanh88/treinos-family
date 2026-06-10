@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { CheckCircle2, Trophy, Plus } from 'lucide-react'
 import { TAG_COLORS } from '../data/workouts'
-import { getOrCreateSession, getExerciseLogs, upsertExerciseLog, completeSession } from '../lib/supabase'
+import { getOrCreateSession, getExerciseLogs, upsertExerciseLog, completeSession, getLastWorkoutLogs } from '../lib/supabase'
 import ExerciseCard from '../components/ExerciseCard'
 
 export default function WorkoutSession({ profile, workout, onBack }) {
   const [sessionId, setSessionId] = useState(null)
   const [logs, setLogs] = useState({})
+  const [lastLogs, setLastLogs] = useState({})
   const [saving, setSaving] = useState(false)
   const [finished, setFinished] = useState(false)
 
@@ -17,8 +18,12 @@ export default function WorkoutSession({ profile, workout, onBack }) {
 
   async function initSession() {
     try {
-      const session = await getOrCreateSession(profile.id, workout.key, today)
+      const [session, prevLogs] = await Promise.all([
+        getOrCreateSession(profile.id, workout.key, today),
+        getLastWorkoutLogs(profile.id, workout.key),
+      ])
       setSessionId(session.id)
+      setLastLogs(prevLogs)
       if (session.completed_at) setFinished(true)
       const exerciseLogs = await getExerciseLogs(session.id)
       const map = {}
@@ -178,7 +183,7 @@ export default function WorkoutSession({ profile, workout, onBack }) {
       <div className="flex-1 px-4 py-4 space-y-3 overflow-y-auto" style={{ paddingBottom: 120, overscrollBehavior: 'contain' }}>
         {workout.exercises.map((ex, i) => (
           <div key={i} className="animate-slide-up" style={{ animationDelay: `${i * 0.04}s` }}>
-            <ExerciseCard exercise={ex} index={i} sessionId={sessionId} log={logs[i]} onLogChange={handleLogChange} />
+            <ExerciseCard exercise={ex} index={i} sessionId={sessionId} log={logs[i]} onLogChange={handleLogChange} lastLoad={lastLogs[i] ?? null} />
           </div>
         ))}
       </div>

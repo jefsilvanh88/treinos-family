@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Check } from 'lucide-react'
 
-export default function ExerciseCard({ exercise, index, sessionId, log, onLogChange, readOnly = false }) {
+export default function ExerciseCard({ exercise, index, sessionId, log, onLogChange, readOnly = false, lastLoad = null }) {
   const [expanded, setExpanded] = useState(false)
   const [animatingSet, setAnimatingSet] = useState(null)
 
@@ -89,26 +89,36 @@ export default function ExerciseCard({ exercise, index, sessionId, log, onLogCha
 
           {/* Load */}
           <div className="flex items-center gap-1.5 ml-auto">
-            <input
-              type="number"
-              inputMode="decimal"
-              enterKeyHint="done"
-              value={loadKg}
-              onChange={handleLoad}
-              placeholder="0"
-              min="0"
-              step="0.5"
-              readOnly={readOnly}
-              aria-label="Carga em kg"
-              className="font-ui font-semibold text-center bg-transparent outline-none rounded-xl"
-              style={{
-                width: 60, height: 44,
-                border: '1px solid var(--border)',
-                background: 'rgba(255,255,255,0.03)',
-                color: 'var(--text-0)',
-                fontSize: 15,
-              }}
-            />
+            <div className="relative">
+              <input
+                type="number"
+                inputMode="decimal"
+                enterKeyHint="done"
+                value={loadKg}
+                onChange={handleLoad}
+                placeholder={lastLoad != null ? String(lastLoad) : '0'}
+                min="0"
+                step="0.5"
+                readOnly={readOnly}
+                aria-label="Carga em kg"
+                className="font-ui font-semibold text-center bg-transparent outline-none rounded-xl"
+                style={{
+                  width: 60, height: 44,
+                  border: '1px solid var(--border)',
+                  background: 'rgba(255,255,255,0.03)',
+                  color: 'var(--text-0)',
+                  fontSize: 15,
+                }}
+              />
+              {lastLoad != null && !loadKg && (
+                <span
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 font-ui text-[9px] font-semibold"
+                  style={{ color: 'var(--text-2)', bottom: 4, pointerEvents: 'none', whiteSpace: 'nowrap' }}
+                >
+                  última: {lastLoad}
+                </span>
+              )}
+            </div>
             <span className="text-xs font-body" style={{ color: 'var(--text-1)' }}>kg</span>
           </div>
         </div>

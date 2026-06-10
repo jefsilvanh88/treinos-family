@@ -112,6 +112,52 @@ export async function deleteSession(sessionId) {
   if (error) throw error
 }
 
+export async function getLastWorkoutLogs(profileId, workoutKey) {
+  if (!supabase) return {}
+  const { data: sessions } = await supabase
+    .from('workout_sessions')
+    .select('id')
+    .eq('profile_id', profileId)
+    .eq('workout_key', workoutKey)
+    .not('completed_at', 'is', null)
+    .order('date', { ascending: false })
+    .limit(1)
+  if (!sessions?.length) return {}
+  const { data: logs, error } = await supabase
+    .from('exercise_logs')
+    .select('exercise_index, load_kg')
+    .eq('session_id', sessions[0].id)
+  if (error) return {}
+  const map = {}
+  logs.forEach(l => { if (l.load_kg != null) map[l.exercise_index] = l.load_kg })
+  return map
+}
+
+export async function getExerciseHistory(profileId, workoutKey, exerciseIndex, limit = 30) {
+  if (!supabase) return []
+  const { data: sessions, error: sErr } = await supabase
+    .from('workout_sessions')
+    .select('id, date')
+    .eq('profile_id', profileId)
+    .eq('workout_key', workoutKey)
+    .not('completed_at', 'is', null)
+    .order('date', { ascending: true })
+    .limit(limit)
+  if (sErr || !sessions?.length) return []
+  const sessionIds = sessions.map(s => s.id)
+  const { data: logs, error: lErr } = await supabase
+    .from('exercise_logs')
+    .select('session_id, load_kg, sets_done')
+    .eq('exercise_index', exerciseIndex)
+    .in('session_id', sessionIds)
+  if (lErr) return []
+  const dateMap = Object.fromEntries(sessions.map(s => [s.id, s.date]))
+  return logs
+    .filter(l => l.load_kg != null)
+    .map(l => ({ date: dateMap[l.session_id], load_kg: l.load_kg, sets_done: l.sets_done }))
+    .sort((a, b) => a.date.localeCompare(b.date))
+}
+
 export async function upsertExerciseLog(sessionId, exerciseIndex, setsDone, loadKg) {
   if (!supabase || String(sessionId).startsWith('local-')) return
 

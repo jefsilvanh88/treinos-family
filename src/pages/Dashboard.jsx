@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { History, ChevronRight, Waves, Target } from 'lucide-react'
+import { History, ChevronRight, Waves, Target, TrendingUp } from 'lucide-react'
 import { WORKOUTS, JEFF_SCHEDULE, TAG_COLORS } from '../data/workouts'
 import { getRecentSessions } from '../lib/supabase'
 import Avatar from '../components/Avatar'
 import History_ from './History'
+import Progress from './Progress'
 
 const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 const DAY_FULL = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
@@ -179,6 +180,7 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
   }
 
   if (view === 'history') return <History_ profile={profile} onBack={() => setView('dashboard')} />
+  if (view === 'progress') return <Progress profile={profile} onBack={() => setView('dashboard')} />
 
   return (
     <div className="min-h-screen flex flex-col safe-top" style={{ background: 'linear-gradient(160deg, var(--bg-1) 0%, var(--bg-0) 100%)' }}>
@@ -193,9 +195,14 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
           >
             ← Trocar perfil
           </button>
-          <IconBtn onClick={() => setView('history')} label="Ver histórico">
-            <History size={18} />
-          </IconBtn>
+          <div className="flex items-center gap-2">
+            <IconBtn onClick={() => setView('progress')} label="Ver progresso">
+              <TrendingUp size={18} />
+            </IconBtn>
+            <IconBtn onClick={() => setView('history')} label="Ver histórico">
+              <History size={18} />
+            </IconBtn>
+          </div>
         </div>
 
         {/* Profile card */}
