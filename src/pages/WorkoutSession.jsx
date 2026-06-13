@@ -10,6 +10,7 @@ export default function WorkoutSession({ profile, workout, onBack }) {
   const [lastLogs, setLastLogs] = useState({})
   const [saving, setSaving] = useState(false)
   const [finished, setFinished] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
   const tagColors = TAG_COLORS[workout.tag]
@@ -194,7 +195,7 @@ export default function WorkoutSession({ profile, workout, onBack }) {
         style={{ background: 'linear-gradient(0deg, var(--bg-0) 60%, transparent)' }}
       >
         <button
-          onClick={handleFinish}
+          onClick={() => setShowConfirm(true)}
           disabled={saving}
           className="w-full font-ui font-bold text-white text-base rounded-2xl flex items-center justify-center gap-2 disabled:opacity-60"
           style={{
@@ -214,6 +215,53 @@ export default function WorkoutSession({ profile, workout, onBack }) {
           {saving ? 'Salvando…' : pct === 1 ? 'Concluir treino' : `Finalizar (${completedEx}/${totalExercises})`}
         </button>
       </div>
+
+      {/* Confirm dialog */}
+      {showConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          style={{ background: 'rgba(0,0,0,0.65)' }}
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className="w-full max-w-[480px] px-5 pb-8 safe-bottom animate-slide-up"
+            onClick={e => e.stopPropagation()}
+          >
+            <div
+              className="rounded-2xl overflow-hidden"
+              style={{ background: 'var(--bg-1)', border: '1px solid var(--border)' }}
+            >
+              <div className="p-5">
+                <p className="font-ui font-bold text-base text-white mb-1">
+                  {pct === 1 ? 'Concluir treino?' : 'Finalizar treino?'}
+                </p>
+                {pct < 1 && (
+                  <p className="text-sm font-body" style={{ color: 'var(--text-1)' }}>
+                    {completedEx} de {totalExercises} exercícios concluídos.
+                  </p>
+                )}
+              </div>
+              <div className="flex" style={{ borderTop: '1px solid var(--border)' }}>
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="flex-1 py-4 font-ui font-semibold text-sm"
+                  style={{ color: 'var(--text-1)' }}
+                >
+                  Cancelar
+                </button>
+                <div style={{ width: 1, background: 'var(--border)' }} />
+                <button
+                  onClick={() => { setShowConfirm(false); handleFinish() }}
+                  className="flex-1 py-4 font-ui font-bold text-sm"
+                  style={{ color: pct === 1 ? '#4ade80' : 'var(--accent)' }}
+                >
+                  {pct === 1 ? 'Concluir' : 'Finalizar assim'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

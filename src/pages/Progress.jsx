@@ -4,6 +4,18 @@ import { WORKOUTS } from '../data/workouts'
 import { getExerciseHistory } from '../lib/supabase'
 import ProgressChart from '../components/ProgressChart'
 
+function groupByMonth(data) {
+  const map = {}
+  ;(data || []).forEach(d => {
+    if (d.load_kg == null) return
+    const key = d.date.slice(0, 7)
+    if (!map[key] || d.load_kg > map[key].load_kg) {
+      map[key] = { ...d, date: key + '-01' }
+    }
+  })
+  return Object.values(map).sort((a, b) => a.date.localeCompare(b.date))
+}
+
 export default function Progress({ profile, onBack }) {
   const workouts = WORKOUTS[profile.key] || {}
   const workoutList = Object.values(workouts)
@@ -71,7 +83,7 @@ export default function Progress({ profile, onBack }) {
               Progresso
             </h1>
             <p className="text-xs font-body" style={{ color: 'var(--text-2)' }}>
-              {profile.name} · evolução de carga por exercício
+              {profile.name} · carga máxima por mês, por exercício
             </p>
           </div>
         </div>
@@ -172,7 +184,7 @@ export default function Progress({ profile, onBack }) {
                         />
                       </div>
                     ) : (
-                      <ProgressChart data={history} height={160} />
+                      <ProgressChart data={groupByMonth(history)} height={160} monthly />
                     )}
                   </div>
                 </div>

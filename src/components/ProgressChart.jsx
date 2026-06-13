@@ -7,10 +7,15 @@ function fmtDate(dateStr) {
   return `${parseInt(d)} ${MONTHS[parseInt(m) - 1]}`
 }
 
+function fmtMonth(dateStr) {
+  const [y, m] = dateStr.split('-')
+  return `${MONTHS[parseInt(m) - 1]}/${y.slice(2)}`
+}
+
 const PAD = { top: 24, right: 20, bottom: 36, left: 40 }
 const W = 340
 
-export default function ProgressChart({ data, height = 160 }) {
+export default function ProgressChart({ data, height = 160, monthly = false }) {
   const filtered = useMemo(() => (data || []).filter(d => d.load_kg != null), [data])
 
   if (filtered.length < 2) {
@@ -114,22 +119,37 @@ export default function ProgressChart({ data, height = 160 }) {
           {last.load_kg} kg
         </text>
 
-        {/* X labels: first + last */}
-        <text
-          x={first.x.toFixed(1)} y={height - 4}
-          textAnchor="middle"
-          fill="rgba(255,255,255,0.3)" fontSize={10} fontFamily="'Barlow', system-ui"
-        >
-          {fmtDate(first.date)}
-        </text>
-        {filtered.length > 2 && (
-          <text
-            x={last.x.toFixed(1)} y={height - 4}
-            textAnchor="middle"
-            fill="rgba(255,255,255,0.3)" fontSize={10} fontFamily="'Barlow', system-ui"
-          >
-            {fmtDate(last.date)}
-          </text>
+        {/* X labels */}
+        {monthly ? (
+          pts.map((p, i) => (
+            <text
+              key={i}
+              x={p.x.toFixed(1)} y={height - 4}
+              textAnchor={i === 0 ? 'start' : i === pts.length - 1 ? 'end' : 'middle'}
+              fill="rgba(255,255,255,0.3)" fontSize={10} fontFamily="'Barlow', system-ui"
+            >
+              {fmtMonth(p.date)}
+            </text>
+          ))
+        ) : (
+          <>
+            <text
+              x={first.x.toFixed(1)} y={height - 4}
+              textAnchor="middle"
+              fill="rgba(255,255,255,0.3)" fontSize={10} fontFamily="'Barlow', system-ui"
+            >
+              {fmtDate(first.date)}
+            </text>
+            {filtered.length > 2 && (
+              <text
+                x={last.x.toFixed(1)} y={height - 4}
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.3)" fontSize={10} fontFamily="'Barlow', system-ui"
+              >
+                {fmtDate(last.date)}
+              </text>
+            )}
+          </>
         )}
       </svg>
     </div>
