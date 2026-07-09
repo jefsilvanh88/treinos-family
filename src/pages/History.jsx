@@ -220,7 +220,7 @@ export default function History({ profile, onBack }) {
                   </div>
                 </button>
 
-                {isOpen && workout && (
+                {isOpen && (
                   <div
                     className="px-4 pb-4 space-y-1 animate-fade-in"
                     style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
@@ -228,36 +228,33 @@ export default function History({ profile, onBack }) {
                     <p className="text-xs font-ui font-semibold pt-3 mb-2" style={{ color: 'var(--accent)' }}>
                       Cargas registradas
                     </p>
-                    {workout.exercises.map((ex, i) => {
-                      const log = logs.find(l => l.exercise_index === i)
-                      return (
+                    {logs.length === 0 ? (
+                      <p className="text-sm font-body py-2" style={{ color: 'var(--text-2)' }}>
+                        Nenhuma carga registrada.
+                      </p>
+                    ) : (
+                      logs.map(log => (
                         <div
-                          key={i}
+                          key={log.id}
                           className="flex items-center justify-between py-2"
                           style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
                         >
                           <p className="text-sm font-body flex-1 pr-3 leading-snug" style={{ color: 'var(--text-1)' }}>
-                            {ex.name}
+                            {log.exercises?.name || 'Exercício'}
                           </p>
                           <div className="flex items-center gap-3 shrink-0">
-                            {log ? (
-                              <>
-                                <span className="text-xs font-body" style={{ color: 'var(--text-2)' }}>
-                                  {log.sets_done}/{ex.sets} séries
-                                </span>
-                                {log.load_kg && (
-                                  <span className="text-xs font-ui font-semibold" style={{ color: 'var(--accent)' }}>
-                                    {log.load_kg} kg
-                                  </span>
-                                )}
-                              </>
-                            ) : (
-                              <span className="text-xs font-body" style={{ color: 'var(--text-2)', opacity: 0.5 }}>—</span>
+                            <span className="text-xs font-body" style={{ color: 'var(--text-2)' }}>
+                              {log.sets_done}{log.exercises?.sets ? `/${log.exercises.sets}` : ''} séries
+                            </span>
+                            {log.load_kg != null && (
+                              <span className="text-xs font-ui font-semibold" style={{ color: 'var(--accent)' }}>
+                                {log.load_kg} kg
+                              </span>
                             )}
                           </div>
                         </div>
-                      )
-                    })}
+                      ))
+                    )}
                   </div>
                 )}
               </div>

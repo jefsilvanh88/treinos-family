@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
 import { WORKOUTS } from '../data/workouts'
-import { getExerciseHistory } from '../lib/supabase'
+import { getExercises, getExerciseHistory } from '../lib/supabase'
 import ProgressChart from '../components/ProgressChart'
 
 function groupByMonth(data) {
@@ -17,44 +17,45 @@ function groupByMonth(data) {
 }
 
 export default function Progress({ profile, onBack }) {
-  const workouts = WORKOUTS[profile.key] || {}
-  const workoutList = Object.values(workouts)
+  const workoutList = Object.values(WORKOUTS[profile.key] || {})
   const [activeKey, setActiveKey] = useState(workoutList[0]?.key || null)
-  const [expanded, setExpanded] = useState(null)
-  const [cache, setCache] = useState({})
+  const [exByWorkout, setExByWorkout] = useState({}) // workoutKey -> exercises[]
+  const [expanded, setExpanded] = useState(null)      // exercise id
+  const [cache, setCache] = useState({})              // exercise id -> history[]
   const [loading, setLoading] = useState({})
 
-  const currentWorkout = workoutList.find(w => w.key === activeKey)
+  const exercises = exByWorkout[activeKey] || []
 
-  const loadHistory = useCallback(async (workoutKey, exerciseIndex) => {
-    const k = `${workoutKey}-${exerciseIndex}`
-    if (cache[k] !== undefined || loading[k]) return
-    setLoading(prev => ({ ...prev, [k]: true }))
+  // Carrega lista de exercícios do treino ativo
+  useEffect(() => {
+    if (!activeKey || exByWorkout[activeKey]) return
+    getExercises(profile.id, activeKey)
+      .then(list => setExByWorkout(prev => ({ ...prev, [activeKey]: list })))
+      .catch(() => setExByWorkout(prev => ({ ...prev, [activeKey]: [] })))
+  }, [activeKey, profile.id, exByWorkout])
+
+  const loadHistory = useCallback(async (exerciseId) => {
+    if (cache[exerciseId] !== undefined || loading[exerciseId]) return
+    setLoading(prev => ({ ...prev, [exerciseId]: true }))
     try {
-      const data = await getExerciseHistory(profile.id, workoutKey, exerciseIndex)
-      setCache(prev => ({ ...prev, [k]: data }))
+      const data = await getExerciseHistory(profile.id, exerciseId)
+      setCache(prev => ({ ...prev, [exerciseId]: data }))
     } catch {
-      setCache(prev => ({ ...prev, [k]: [] }))
+      setCache(prev => ({ ...prev, [exerciseId]: [] }))
     } finally {
-      setLoading(prev => ({ ...prev, [k]: false }))
+      setLoading(prev => ({ ...prev, [exerciseId]: false }))
     }
   }, [profile.id, cache, loading])
 
-  // Preload all exercises for current workout
+  // Pré-carrega histórico dos exercícios do treino ativo
   useEffect(() => {
-    if (!currentWorkout) return
-    currentWorkout.exercises.forEach((_, i) => loadHistory(activeKey, i))
-  }, [activeKey]) // eslint-disable-line react-hooks/exhaustive-deps
+    exercises.forEach(ex => loadHistory(ex.id))
+  }, [exercises]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  function handleExpand(i) {
-    if (expanded === i) { setExpanded(null); return }
-    setExpanded(i)
-    loadHistory(activeKey, i)
-  }
-
-  function handleTabChange(key) {
-    setActiveKey(key)
-    setExpanded(null)
+  function handleExpand(id) {
+    if (expanded === id) { setExpanded(null); return }
+    setExpanded(id)
+    loadHistory(id)
   }
 
   return (
@@ -95,7 +96,7 @@ export default function Progress({ profile, onBack }) {
           {workoutList.map(w => (
             <button
               key={w.key}
-              onClick={() => handleTabChange(w.key)}
+              onClick={() => { setActiveKey(w.key); setExpanded(null) }}
               className="font-ui font-semibold text-sm rounded-xl px-4"
               style={{
                 height: 36,
@@ -113,42 +114,32 @@ export default function Progress({ profile, onBack }) {
 
       {/* Exercise list */}
       <div className="flex-1 px-5 pb-8 space-y-2 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
-        {currentWorkout?.exercises.map((ex, i) => {
-          const k = `${activeKey}-${i}`
-          const history = cache[k] || []
-          const isLoading = loading[k]
-          const isOpen = expanded === i
+        {exercises.map((ex, i) => {
+          const history = cache[ex.id] || []
+          const isLoading = loading[ex.id]
+          const isOpen = expanded === ex.id
           const lastLoad = history.slice(-1)[0]?.load_kg ?? null
           const hasData = history.length >= 2
 
           return (
             <div
-              key={i}
+              key={ex.id}
               className="rounded-2xl overflow-hidden animate-slide-up"
-              style={{
-                animationDelay: `${i * 0.03}s`,
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-              }}
+              style={{ animationDelay: `${i * 0.03}s`, background: 'var(--bg-card)', border: '1px solid var(--border)' }}
             >
               <button
-                onClick={() => handleExpand(i)}
+                onClick={() => handleExpand(ex.id)}
                 aria-expanded={isOpen}
                 className="w-full text-left"
                 style={{ minHeight: 64 }}
               >
                 <div className="p-4 flex items-center gap-3">
-                  {/* Mini trend indicator */}
                   <div
                     className="flex items-center justify-center shrink-0 rounded-lg"
-                    style={{
-                      width: 36, height: 36,
-                      background: hasData ? 'var(--accent-dim)' : 'rgba(255,255,255,0.04)',
-                    }}
+                    style={{ width: 36, height: 36, background: hasData ? 'var(--accent-dim)' : 'rgba(255,255,255,0.04)' }}
                   >
                     <TrendingUp size={16} style={{ color: hasData ? 'var(--accent)' : 'var(--text-2)' }} />
                   </div>
-
                   <div className="flex-1 min-w-0">
                     <p className="font-ui font-semibold text-sm leading-snug" style={{ color: 'var(--text-0)' }}>
                       {ex.name}
@@ -158,30 +149,21 @@ export default function Progress({ profile, onBack }) {
                         ? 'Carregando…'
                         : history.length > 0
                           ? `${history.length} registro${history.length > 1 ? 's' : ''}${lastLoad ? ` · último: ${lastLoad} kg` : ''}`
-                          : 'Sem registros ainda'
-                      }
+                          : 'Sem registros ainda'}
                     </p>
                   </div>
-
                   {isOpen
                     ? <ChevronUp size={16} style={{ color: 'var(--text-2)', flexShrink: 0 }} />
-                    : <ChevronDown size={16} style={{ color: 'var(--text-2)', flexShrink: 0 }} />
-                  }
+                    : <ChevronDown size={16} style={{ color: 'var(--text-2)', flexShrink: 0 }} />}
                 </div>
               </button>
 
               {isOpen && (
-                <div
-                  className="px-4 pb-4 animate-fade-in"
-                  style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-                >
+                <div className="px-4 pb-4 animate-fade-in" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                   <div className="pt-3">
                     {isLoading ? (
                       <div className="flex justify-center" style={{ height: 160, alignItems: 'center' }}>
-                        <div
-                          className="w-6 h-6 rounded-full border-2 animate-spin"
-                          style={{ borderColor: 'var(--accent-border)', borderTopColor: 'var(--accent)' }}
-                        />
+                        <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'var(--accent-border)', borderTopColor: 'var(--accent)' }} />
                       </div>
                     ) : (
                       <ProgressChart data={groupByMonth(history)} height={160} monthly />
@@ -192,6 +174,12 @@ export default function Progress({ profile, onBack }) {
             </div>
           )
         })}
+
+        {exercises.length === 0 && (
+          <p className="text-center text-sm font-body pt-10" style={{ color: 'var(--text-2)' }}>
+            Sem exercícios neste treino.
+          </p>
+        )}
       </div>
     </div>
   )

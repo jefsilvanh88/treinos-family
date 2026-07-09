@@ -94,13 +94,71 @@ export async function getRecentSessions(profileId, limit = 10) {
   return data
 }
 
+// ── Exercises (editáveis, fonte da verdade no banco) ──────
+
+export async function getExercises(profileId, workoutKey) {
+  if (!supabase) return []
+  const { data, error } = await supabase
+    .from('exercises')
+    .select('*')
+    .eq('profile_id', profileId)
+    .eq('workout_key', workoutKey)
+    .eq('archived', false)
+    .order('position', { ascending: true })
+  if (error) throw error
+  return data
+}
+
+export async function addExercise(profileId, workoutKey, fields) {
+  if (!supabase) throw new Error('Supabase não configurado')
+  const { data: last } = await supabase
+    .from('exercises')
+    .select('position')
+    .eq('profile_id', profileId)
+    .eq('workout_key', workoutKey)
+    .order('position', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const position = (last?.position ?? -1) + 1
+  const { data, error } = await supabase
+    .from('exercises')
+    .insert({ profile_id: profileId, workout_key: workoutKey, position, ...fields })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function updateExercise(id, patch) {
+  if (!supabase) return
+  const { data, error } = await supabase
+    .from('exercises')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// Soft-delete: mantém o histórico de cargas ligado ao exercício
+export async function archiveExercise(id) {
+  if (!supabase) return
+  const { error } = await supabase
+    .from('exercises')
+    .update({ archived: true })
+    .eq('id', id)
+  if (error) throw error
+}
+
 // ── Exercise Logs ─────────────────────────────────────────
 
+// Logs da sessão + nome do exercício (p/ histórico, resolve até arquivados)
 export async function getExerciseLogs(sessionId) {
   if (!supabase || String(sessionId).startsWith('local-')) return []
   const { data, error } = await supabase
     .from('exercise_logs')
-    .select('*')
+    .select('*, exercises(name, sets)')
     .eq('session_id', sessionId)
   if (error) throw error
   return data
@@ -112,60 +170,62 @@ export async function deleteSession(sessionId) {
   if (error) throw error
 }
 
-export async function getLastWorkoutLogs(profileId, workoutKey) {
+// Última carga por exercício — QUALQUER sessão (não exige finalizada).
+// Corrige bug: antes só olhava sessões com completed_at, então quase nunca aparecia.
+export async function getLastLoads(profileId, workoutKey) {
   if (!supabase) return {}
   const { data: sessions } = await supabase
-    .from('workout_sessions')
-    .select('id')
-    .eq('profile_id', profileId)
-    .eq('workout_key', workoutKey)
-    .not('completed_at', 'is', null)
-    .order('date', { ascending: false })
-    .limit(1)
-  if (!sessions?.length) return {}
-  const { data: logs, error } = await supabase
-    .from('exercise_logs')
-    .select('exercise_index, load_kg')
-    .eq('session_id', sessions[0].id)
-  if (error) return {}
-  const map = {}
-  logs.forEach(l => { if (l.load_kg != null) map[l.exercise_index] = l.load_kg })
-  return map
-}
-
-export async function getExerciseHistory(profileId, workoutKey, exerciseIndex, limit = 30) {
-  if (!supabase) return []
-  const { data: sessions, error: sErr } = await supabase
     .from('workout_sessions')
     .select('id, date')
     .eq('profile_id', profileId)
     .eq('workout_key', workoutKey)
-    .not('completed_at', 'is', null)
-    .order('date', { ascending: true })
-    .limit(limit)
-  if (sErr || !sessions?.length) return []
+    .order('date', { ascending: false })
+  if (!sessions?.length) return {}
   const sessionIds = sessions.map(s => s.id)
-  const { data: logs, error: lErr } = await supabase
-    .from('exercise_logs')
-    .select('session_id, load_kg, sets_done')
-    .eq('exercise_index', exerciseIndex)
-    .in('session_id', sessionIds)
-  if (lErr) return []
   const dateMap = Object.fromEntries(sessions.map(s => [s.id, s.date]))
+  const { data: logs, error } = await supabase
+    .from('exercise_logs')
+    .select('session_id, exercise_id, load_kg')
+    .in('session_id', sessionIds)
+    .not('load_kg', 'is', null)
+    .not('exercise_id', 'is', null)
+  if (error) return {}
+  // p/ cada exercise_id, mantém a carga da sessão mais recente
+  const map = {}
+  logs.forEach(l => {
+    const d = dateMap[l.session_id]
+    if (!map[l.exercise_id] || d > map[l.exercise_id].date) {
+      map[l.exercise_id] = { date: d, load: l.load_kg }
+    }
+  })
+  const out = {}
+  Object.entries(map).forEach(([exId, v]) => { out[exId] = v.load })
+  return out
+}
+
+export async function getExerciseHistory(profileId, exerciseId, limit = 60) {
+  if (!supabase || !exerciseId) return []
+  const { data: logs, error } = await supabase
+    .from('exercise_logs')
+    .select('load_kg, sets_done, workout_sessions(date)')
+    .eq('exercise_id', exerciseId)
+    .not('load_kg', 'is', null)
+    .limit(limit)
+  if (error) return []
   return logs
-    .filter(l => l.load_kg != null)
-    .map(l => ({ date: dateMap[l.session_id], load_kg: l.load_kg, sets_done: l.sets_done }))
+    .map(l => ({ date: l.workout_sessions?.date, load_kg: l.load_kg, sets_done: l.sets_done }))
+    .filter(l => l.date)
     .sort((a, b) => a.date.localeCompare(b.date))
 }
 
-export async function upsertExerciseLog(sessionId, exerciseIndex, setsDone, loadKg) {
-  if (!supabase || String(sessionId).startsWith('local-')) return
+export async function upsertExerciseLog(sessionId, exerciseId, setsDone, loadKg) {
+  if (!supabase || String(sessionId).startsWith('local-') || !exerciseId) return
 
   const { data: existing } = await supabase
     .from('exercise_logs')
     .select('id')
     .eq('session_id', sessionId)
-    .eq('exercise_index', exerciseIndex)
+    .eq('exercise_id', exerciseId)
     .maybeSingle()
 
   if (existing) {
@@ -177,7 +237,7 @@ export async function upsertExerciseLog(sessionId, exerciseIndex, setsDone, load
   } else {
     const { error } = await supabase
       .from('exercise_logs')
-      .insert({ session_id: sessionId, exercise_index: exerciseIndex, sets_done: setsDone, load_kg: loadKg })
+      .insert({ session_id: sessionId, exercise_id: exerciseId, sets_done: setsDone, load_kg: loadKg })
     if (error) throw error
   }
 }
