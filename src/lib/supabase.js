@@ -200,6 +200,16 @@ export async function getLastLoads(profileId, workoutKey) {
   })
   const out = {}
   Object.entries(map).forEach(([exId, v]) => { out[exId] = v.load })
+  // Exercício sem log próprio herda a carga do exercício de origem (troca de ciclo)
+  const { data: derived } = await supabase
+    .from('exercises')
+    .select('id, origin_exercise_id')
+    .eq('profile_id', profileId)
+    .eq('workout_key', workoutKey)
+    .not('origin_exercise_id', 'is', null)
+  derived?.forEach(e => {
+    if (out[e.id] == null && out[e.origin_exercise_id] != null) out[e.id] = out[e.origin_exercise_id]
+  })
   return out
 }
 

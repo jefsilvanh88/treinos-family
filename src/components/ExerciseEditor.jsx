@@ -17,7 +17,6 @@ export default function ExerciseEditor({ exercise, onSave, onClose }) {
   const [name, setName] = useState(exercise?.name ?? '')
   const [sets, setSets] = useState(exercise?.sets ?? 3)
   const [reps, setReps] = useState(exercise?.reps ?? '10–12')
-  const [rest, setRest] = useState(exercise?.rest ?? 60)
   const [busy, setBusy] = useState(false)
 
   const valid = name.trim().length > 0 && Number(sets) >= 1
@@ -29,7 +28,6 @@ export default function ExerciseEditor({ exercise, onSave, onClose }) {
       name: name.trim(),
       sets: Math.max(1, parseInt(sets) || 1),
       reps: reps.trim(),
-      rest: Math.max(0, parseInt(rest) || 0),
     })
     setBusy(false)
   }
@@ -73,22 +71,12 @@ export default function ExerciseEditor({ exercise, onSave, onClose }) {
                   style={{ ...FIELD, textAlign: 'center' }}
                 />
               </label>
-              <label className="block flex-[1.4]">
+              <label className="block flex-[2]">
                 <span className="text-xs font-ui font-semibold" style={{ color: 'var(--text-2)' }}>Reps</span>
                 <input
                   value={reps}
                   onChange={e => setReps(e.target.value)}
                   placeholder="8–10"
-                  className="mt-1.5"
-                  style={{ ...FIELD, textAlign: 'center' }}
-                />
-              </label>
-              <label className="block flex-1">
-                <span className="text-xs font-ui font-semibold" style={{ color: 'var(--text-2)' }}>Desc. (s)</span>
-                <input
-                  type="number" inputMode="numeric" min="0" step="5"
-                  value={rest}
-                  onChange={e => setRest(e.target.value)}
                   className="mt-1.5"
                   style={{ ...FIELD, textAlign: 'center' }}
                 />

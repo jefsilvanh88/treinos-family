@@ -7,15 +7,13 @@ export const PROFILES = [
     key: 'jeff',
     name: 'Jeff',
     split: 'ABC',
-    scheduledDays: [2, 4, 6],
     objective: 'Hipertrofia',
-    objectiveDetail: 'Ganhar massa muscular com sobrecarga progressiva. Treinos Push/Pull/Legs 3×/semana — intensidade alta, descansos longos nos compostos.',
+    objectiveDetail: 'Ganhar massa muscular com sobrecarga progressiva. Push/Pull/Legs sem dia fixo — treina na ordem A → B → C, na frequência que der.',
   },
   {
     key: 'nicole',
     name: 'Nicole',
     split: 'ABCD',
-    scheduledDays: null,
     objective: 'Preservação muscular',
     objectiveDetail: 'Retorno ao treino com intensidade controlada (RIR 3 — longe da falha). Manter e recuperar massa sem sobrecarregar as articulações. Foco em compostos com halteres e máquinas.',
   },
@@ -23,16 +21,15 @@ export const PROFILES = [
     key: 'jo',
     name: 'Jô',
     split: 'ABCD',
-    scheduledDays: null,
     objective: 'Performance no vôlei',
     objectiveDetail: 'Complementar o vôlei com foco em cadeia posterior (base para o salto), saúde do ombro e equilíbrio muscular. Treino sem falha (RIR 2–3), sem barra nas costas.',
   },
 ]
 
 const jeffWorkouts = {
-  treino_a: { key: 'treino_a', label: 'Treino A', focus: 'Peito, Ombros e Tríceps', tag: 'Push', day: 'Terça-feira' },
-  treino_b: { key: 'treino_b', label: 'Treino B', focus: 'Costas e Bíceps',          tag: 'Pull', day: 'Quinta-feira' },
-  treino_c: { key: 'treino_c', label: 'Treino C', focus: 'Pernas e Core',            tag: 'Legs', day: 'Sábado' },
+  treino_a: { key: 'treino_a', label: 'Treino A', focus: 'Peito, Ombros e Tríceps', tag: 'Push' },
+  treino_b: { key: 'treino_b', label: 'Treino B', focus: 'Costas e Bíceps',          tag: 'Pull' },
+  treino_c: { key: 'treino_c', label: 'Treino C', focus: 'Pernas e Core',            tag: 'Legs' },
 }
 
 const grupoWorkouts = {
@@ -46,13 +43,6 @@ export const WORKOUTS = {
   jeff: jeffWorkouts,
   nicole: grupoWorkouts,
   jo: grupoWorkouts,
-}
-
-// Dia da semana → treino do Jeff (JS getDay: 0=Dom … 6=Sáb)
-export const JEFF_SCHEDULE = {
-  2: 'treino_a',
-  4: 'treino_b',
-  6: 'treino_c',
 }
 
 export const TAG_COLORS = {

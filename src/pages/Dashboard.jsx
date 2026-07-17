@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { History, ChevronRight, Waves, Target, TrendingUp } from 'lucide-react'
-import { WORKOUTS, JEFF_SCHEDULE, TAG_COLORS } from '../data/workouts'
+import { History, ChevronRight, Target, TrendingUp } from 'lucide-react'
+import { WORKOUTS, TAG_COLORS } from '../data/workouts'
 import { getRecentSessions } from '../lib/supabase'
 import Avatar from '../components/Avatar'
 import History_ from './History'
@@ -93,25 +93,25 @@ function IconBtn({ onClick, label, children }) {
   )
 }
 
-function WorkoutCard({ workout, onClick, left, isToday }) {
+function WorkoutCard({ workout, onClick, left }) {
   const tagColors = TAG_COLORS[workout?.tag]
   return (
     <button
       onClick={onClick}
       className="w-full text-left rounded-2xl"
       style={{
-        background: isToday ? 'linear-gradient(135deg, #101838, #0c1330)' : 'var(--bg-card)',
-        border: isToday ? '1px solid var(--accent-border)' : '1px solid var(--border)',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
         transition: 'background 0.2s var(--ease-out), border-color 0.2s var(--ease-out), transform 0.15s var(--ease-out)',
         overflow: 'hidden',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.background = isToday ? 'linear-gradient(135deg, #172044, #12183a)' : 'var(--bg-card-hover)'
+        e.currentTarget.style.background = 'var(--bg-card-hover)'
         e.currentTarget.style.borderColor = 'var(--accent-border)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.background = isToday ? 'linear-gradient(135deg, #101838, #0c1330)' : 'var(--bg-card)'
-        e.currentTarget.style.borderColor = isToday ? 'var(--accent-border)' : 'var(--border)'
+        e.currentTarget.style.background = 'var(--bg-card)'
+        e.currentTarget.style.borderColor = 'var(--border)'
       }}
       onPointerDown={e => { e.currentTarget.style.transform = 'scale(0.985)' }}
       onPointerUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
@@ -149,82 +149,17 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
     getRecentSessions(profile.id, 60).then(setSessions).catch(() => {})
   }, [profile.id])
 
-  function renderJeffSchedule() {
-    const days = [
-      { dow: 2, label: 'Terça',  workoutKey: 'treino_a' },
-      { dow: 4, label: 'Quinta', workoutKey: 'treino_b' },
-      { dow: 5, label: 'Sexta',  workoutKey: null, swim: true },
-      { dow: 6, label: 'Sáb',    workoutKey: 'treino_c' },
-    ]
-
-    return (
-      <div className="space-y-2.5">
-        <p className="text-xs font-ui font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-2)', letterSpacing: '0.1em' }}>
-          Esta semana
-        </p>
-        {days.map(({ dow, label, workoutKey, swim }) => {
-          const isToday = todayDow === dow
-          const w = workoutKey ? workouts[workoutKey] : null
-
-          const dayPill = (
-            <div
-              className="flex flex-col items-center justify-center shrink-0 rounded-xl"
-              style={{
-                width: 48, height: 48,
-                background: isToday ? 'var(--accent-dim)' : 'rgba(255,255,255,0.04)',
-              }}
-            >
-              <span className="text-xs font-ui font-semibold" style={{ color: isToday ? 'var(--accent)' : 'var(--text-2)' }}>
-                {label.slice(0, 3)}
-              </span>
-              {isToday && (
-                <span className="mt-0.5 rounded-full" style={{ width: 5, height: 5, background: 'var(--accent)' }} />
-              )}
-            </div>
-          )
-
-          if (swim) {
-            return (
-              <div
-                key={dow}
-                className="flex items-center gap-3 p-4 rounded-2xl"
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', opacity: 0.65 }}
-              >
-                {dayPill}
-                <Waves size={15} style={{ color: '#5c9bff' }} />
-                <span className="font-ui font-medium text-sm" style={{ color: '#7dd3fc' }}>Natação</span>
-              </div>
-            )
-          }
-
-          if (!w) return null
-
-          return (
-            <WorkoutCard
-              key={dow}
-              workout={w}
-              onClick={() => onStartWorkout(w)}
-              isToday={isToday}
-              left={dayPill}
-            />
-          )
-        })}
-      </div>
-    )
-  }
-
   function renderFreeList() {
     return (
       <div className="space-y-2.5">
         <p className="text-xs font-ui font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-2)', letterSpacing: '0.1em' }}>
           Escolha seu treino
         </p>
-        {Object.values(workouts).map((w, i) => (
+        {Object.values(workouts).map(w => (
           <WorkoutCard
             key={w.key}
             workout={w}
             onClick={() => onStartWorkout(w)}
-            isToday={false}
             left={
               <div
                 className="flex items-center justify-center shrink-0 rounded-xl"
@@ -285,12 +220,6 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
             <p className="text-sm mt-1 font-body" style={{ color: 'var(--text-1)' }}>
               {DAY_FULL[todayDow]}, {formatDate(today)}
             </p>
-            {profile.key === 'jeff' && JEFF_SCHEDULE[todayDow] && (
-              <div className="mt-2 flex items-center gap-1.5">
-                <span className="rounded-full animate-pulse" style={{ width: 7, height: 7, background: 'var(--accent)', display: 'inline-block' }} />
-                <span className="text-xs font-ui font-semibold" style={{ color: 'var(--accent)' }}>Dia de treino!</span>
-              </div>
-            )}
           </div>
         </div>
       </div>
