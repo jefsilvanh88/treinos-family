@@ -14,8 +14,8 @@ export const PROFILES = [
     key: 'nicole',
     name: 'Nicole',
     split: 'ABCD',
-    objective: 'Preservação muscular',
-    objectiveDetail: 'Retorno ao treino com intensidade controlada (RIR 3 — longe da falha). Manter e recuperar massa sem sobrecarregar as articulações. Foco em compostos com halteres e máquinas.',
+    objective: 'Glúteos e posterior',
+    objectiveDetail: 'Ciclo do personal: 3 treinos de inferiores glúteo-dominantes + 1 de superiores, que repete 2× na semana. Séries em pirâmide (carga sobe a cada série, a última é pesada), bi-sets emendados sem descanso e dropset no fim do D. Ordem: A → B → C → B → D.',
   },
   {
     key: 'jo',
@@ -32,6 +32,13 @@ const jeffWorkouts = {
   treino_c: { key: 'treino_c', label: 'Treino C', focus: 'Pernas e Core',            tag: 'Legs' },
 }
 
+const nicoleWorkouts = {
+  treino_a: { key: 'treino_a', label: 'Treino A', focus: 'Posterior de Coxa e Glúteos', tag: 'Glutes' },
+  treino_b: { key: 'treino_b', label: 'Treino B', focus: 'Superiores + HIIT (2× na semana)', tag: 'Upper' },
+  treino_c: { key: 'treino_c', label: 'Treino C', focus: 'Quadríceps e Glúteos',        tag: 'Legs' },
+  treino_d: { key: 'treino_d', label: 'Treino D', focus: 'Glúteos',                     tag: 'Glutes' },
+}
+
 const grupoWorkouts = {
   treino_a: { key: 'treino_a', label: 'Treino A', focus: 'Peito, Ombros e Tríceps',        tag: 'Push' },
   treino_b: { key: 'treino_b', label: 'Treino B', focus: 'Pernas — Quadríceps e Adutores', tag: 'Legs' },
@@ -41,7 +48,7 @@ const grupoWorkouts = {
 
 export const WORKOUTS = {
   jeff: jeffWorkouts,
-  nicole: grupoWorkouts,
+  nicole: nicoleWorkouts,
   jo: grupoWorkouts,
 }
 
@@ -50,4 +57,5 @@ export const TAG_COLORS = {
   Pull:   { bg: 'bg-blue-500/20',   text: 'text-blue-400',   border: 'border-blue-500/30' },
   Legs:   { bg: 'bg-green-500/20',  text: 'text-green-400',  border: 'border-green-500/30' },
   Glutes: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30' },
+  Upper:  { bg: 'bg-pink-500/20',   text: 'text-pink-400',   border: 'border-pink-500/30' },
 }
