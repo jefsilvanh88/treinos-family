@@ -1,23 +1,52 @@
+import { useEffect, useRef, useState } from 'react'
 import { Check, Pencil, Trash2 } from 'lucide-react'
+
+// Aceita vírgula (teclado pt-BR). Campo vazio ou meio digitado ("12,") vira null.
+function parseLoad(text) {
+  const n = parseFloat(String(text).replace(',', '.'))
+  return Number.isFinite(n) ? n : null
+}
 
 export default function ExerciseCard({
   exercise, index, log, onLogChange,
   readOnly = false, lastLoad = null,
   editing = false, onEdit, onDelete,
 }) {
-  const setsDone = log?.sets_done ?? 0
-  const loadKg   = log?.load_kg  ?? ''
-  const allDone  = setsDone >= exercise.sets
+  const setsDone  = log?.sets_done ?? 0
+  const savedLoad = log?.load_kg ?? null
+  const allDone   = setsDone >= exercise.sets
+
+  // draft = texto enquanto digita; null = espelha o valor salvo
+  const [draft, setDraft] = useState(null)
+  const loadText = draft ?? (savedLoad == null ? '' : String(savedLoad))
+
+  const timer = useRef(null)
+  const setsRef = useRef(setsDone)
+  useEffect(() => { setsRef.current = setsDone }, [setsDone])
+  useEffect(() => () => clearTimeout(timer.current), [])
+
+  function commitLoad(text) {
+    clearTimeout(timer.current)
+    setDraft(null)
+    onLogChange(exercise.id, setsRef.current, parseLoad(text))
+  }
 
   function handleSetToggle(setIdx) {
     if (readOnly || editing) return
     const newSetsDone = setIdx < setsDone ? setIdx : setIdx + 1
-    onLogChange(exercise.id, newSetsDone, loadKg || null)
+    onLogChange(exercise.id, newSetsDone, parseLoad(loadText))
   }
 
+  // Grava 600ms depois da última tecla, em vez de a cada dígito
   function handleLoad(e) {
     const val = e.target.value
-    onLogChange(exercise.id, setsDone, val ? parseFloat(val) : null)
+    setDraft(val)
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => commitLoad(val), 600)
+  }
+
+  function handleLoadBlur() {
+    if (draft !== null) commitLoad(draft)
   }
 
   return (
@@ -104,14 +133,13 @@ export default function ExerciseCard({
             <div className="flex items-center gap-1.5 ml-auto">
               <div className="relative">
                 <input
-                  type="number"
+                  type="text"
                   inputMode="decimal"
                   enterKeyHint="done"
-                  value={loadKg}
+                  value={loadText}
                   onChange={handleLoad}
+                  onBlur={handleLoadBlur}
                   placeholder={lastLoad != null ? String(lastLoad) : '0'}
-                  min="0"
-                  step="0.5"
                   readOnly={readOnly}
                   aria-label="Carga em kg"
                   className="font-ui font-semibold text-center bg-transparent outline-none rounded-xl"
@@ -123,7 +151,7 @@ export default function ExerciseCard({
                     fontSize: 15,
                   }}
                 />
-                {lastLoad != null && !loadKg && (
+                {lastLoad != null && !loadText && (
                   <span
                     className="absolute bottom-0 left-1/2 -translate-x-1/2 font-ui text-[9px] font-semibold"
                     style={{ color: 'var(--text-2)', bottom: 4, pointerEvents: 'none', whiteSpace: 'nowrap' }}

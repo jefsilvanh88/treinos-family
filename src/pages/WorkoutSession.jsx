@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { CheckCircle2, Trophy, Plus, Pencil, Check } from 'lucide-react'
+import { CheckCircle2, Trophy, Plus, Pencil, Check, AlertTriangle } from 'lucide-react'
 import { TAG_COLORS } from '../data/workouts'
 import {
   getOrCreateSession, getExerciseLogs, upsertExerciseLog, completeSession,
@@ -19,6 +19,7 @@ export default function WorkoutSession({ profile, workout, onBack }) {
   const [showConfirm, setShowConfirm] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editorEx, setEditorEx] = useState(null)  // null=fechado, {}=novo, {..}=editar
+  const [saveError, setSaveError] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
   const tagColors = TAG_COLORS[workout.tag]
@@ -48,8 +49,14 @@ export default function WorkoutSession({ profile, workout, onBack }) {
   const handleLogChange = useCallback(async (exerciseId, setsDone, loadKg) => {
     setLogs(prev => ({ ...prev, [exerciseId]: { sets_done: setsDone, load_kg: loadKg } }))
     if (!sessionId) return
-    try { await upsertExerciseLog(sessionId, exerciseId, setsDone, loadKg) }
-    catch (e) { console.error('Log save failed', e) }
+    try {
+      await upsertExerciseLog(sessionId, exerciseId, setsDone, loadKg)
+      setSaveError(false)
+    } catch (e) {
+      // Silenciar aqui já custou 5 semanas de treino sem carga gravada
+      console.error('Log save failed', e)
+      setSaveError(true)
+    }
   }, [sessionId])
 
   async function handleSaveExercise(fields) {
@@ -215,6 +222,18 @@ export default function WorkoutSession({ profile, workout, onBack }) {
             <span className="text-xs font-ui font-semibold tabular-nums" style={{ color: 'var(--text-1)' }}>
               {completedEx}/{totalExercises}
             </span>
+          </div>
+        )}
+
+        {saveError && (
+          <div
+            className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2"
+            style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)' }}
+          >
+            <AlertTriangle size={15} style={{ color: '#f87171', flexShrink: 0 }} />
+            <p className="text-xs font-body" style={{ color: '#fca5a5' }}>
+              Não deu pra salvar no servidor. Sem internet? O que você marcar agora pode se perder.
+            </p>
           </div>
         )}
       </div>

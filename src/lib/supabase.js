@@ -231,23 +231,11 @@ export async function getExerciseHistory(profileId, exerciseId, limit = 60) {
 export async function upsertExerciseLog(sessionId, exerciseId, setsDone, loadKg) {
   if (!supabase || String(sessionId).startsWith('local-') || !exerciseId) return
 
-  const { data: existing } = await supabase
+  const { error } = await supabase
     .from('exercise_logs')
-    .select('id')
-    .eq('session_id', sessionId)
-    .eq('exercise_id', exerciseId)
-    .maybeSingle()
-
-  if (existing) {
-    const { error } = await supabase
-      .from('exercise_logs')
-      .update({ sets_done: setsDone, load_kg: loadKg })
-      .eq('id', existing.id)
-    if (error) throw error
-  } else {
-    const { error } = await supabase
-      .from('exercise_logs')
-      .insert({ session_id: sessionId, exercise_id: exerciseId, sets_done: setsDone, load_kg: loadKg })
-    if (error) throw error
-  }
+    .upsert(
+      { session_id: sessionId, exercise_id: exerciseId, sets_done: setsDone, load_kg: loadKg },
+      { onConflict: 'session_id,exercise_id' },
+    )
+  if (error) throw error
 }
