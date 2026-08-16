@@ -16,11 +16,13 @@ const DELETE_WIDTH = 80
 function SwipeRow({ children, onDelete }) {
   const [offsetX, setOffsetX] = useState(0)
   const [revealed, setRevealed] = useState(false)
+  const [dragging, setDragging] = useState(false)  // estado, não ref: o render depende disso
   const startX = useRef(null)
   const rowRef = useRef(null)
 
   function onTouchStart(e) {
     startX.current = e.touches[0].clientX
+    setDragging(true)
   }
 
   function onTouchMove(e) {
@@ -34,6 +36,7 @@ function SwipeRow({ children, onDelete }) {
 
   function onTouchEnd() {
     startX.current = null
+    setDragging(false)
     if (offsetX < -SWIPE_THRESHOLD) {
       setOffsetX(-DELETE_WIDTH)
       setRevealed(true)
@@ -72,7 +75,7 @@ function SwipeRow({ children, onDelete }) {
         onTouchEnd={onTouchEnd}
         style={{
           transform: `translateX(${offsetX}px)`,
-          transition: startX.current === null ? 'transform 0.25s var(--ease-out)' : 'none',
+          transition: dragging ? 'none' : 'transform 0.25s var(--ease-out)',
         }}
       >
         {children}

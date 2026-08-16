@@ -28,7 +28,7 @@ export default function App() {
             setScreen('dashboard')
             return
           }
-        } catch (_) {
+        } catch {
           // Supabase not reachable — restore from local data
           setProfile({ ...profileDef, id: savedId, name: profileDef.name })
           setScreen('dashboard')

@@ -19,7 +19,7 @@ export default function WorkoutSession({ profile, workout, onBack }) {
   const [showConfirm, setShowConfirm] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editorEx, setEditorEx] = useState(null)  // null=fechado, {}=novo, {..}=editar
-  const [saveError, setSaveError] = useState(false)
+  const [failedIds, setFailedIds] = useState(() => new Set())  // exercícios que não gravaram
 
   const today = new Date().toISOString().split('T')[0]
   const tagColors = TAG_COLORS[workout.tag]
@@ -28,6 +28,7 @@ export default function WorkoutSession({ profile, workout, onBack }) {
 
   async function initSession() {
     setLoading(true)
+    setFailedIds(new Set())
     try {
       const [session, prevLoads, exList] = await Promise.all([
         getOrCreateSession(profile.id, workout.key, today),
@@ -51,11 +52,17 @@ export default function WorkoutSession({ profile, workout, onBack }) {
     if (!sessionId) return
     try {
       await upsertExerciseLog(sessionId, exerciseId, setsDone, loadKg)
-      setSaveError(false)
+      // Limpa só este exercício: outro pode continuar pendente
+      setFailedIds(prev => {
+        if (!prev.has(exerciseId)) return prev
+        const next = new Set(prev)
+        next.delete(exerciseId)
+        return next
+      })
     } catch (e) {
       // Silenciar aqui já custou 5 semanas de treino sem carga gravada
       console.error('Log save failed', e)
-      setSaveError(true)
+      setFailedIds(prev => new Set(prev).add(exerciseId))
     }
   }, [sessionId])
 
@@ -225,14 +232,15 @@ export default function WorkoutSession({ profile, workout, onBack }) {
           </div>
         )}
 
-        {saveError && (
+        {failedIds.size > 0 && (
           <div
-            className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2"
+            className="mt-3 flex items-start gap-2 rounded-xl px-3 py-2"
             style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)' }}
           >
-            <AlertTriangle size={15} style={{ color: '#f87171', flexShrink: 0 }} />
+            <AlertTriangle size={15} style={{ color: '#f87171', flexShrink: 0, marginTop: 2 }} />
             <p className="text-xs font-body" style={{ color: '#fca5a5' }}>
-              Não deu pra salvar no servidor. Sem internet? O que você marcar agora pode se perder.
+              Não gravou: {exercises.filter(e => failedIds.has(e.id)).map(e => e.name).join(', ')}.
+              Sem internet? Toque de novo pra tentar.
             </p>
           </div>
         )}
