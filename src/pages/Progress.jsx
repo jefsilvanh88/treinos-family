@@ -17,7 +17,7 @@ function groupByMonth(data) {
 }
 
 export default function Progress({ profile, onBack }) {
-  const workoutList = Object.values(WORKOUTS[profile.key] || {})
+  const workoutList = Object.values(WORKOUTS[profile.key] || {}).filter(w => !w.archived)
   const [activeKey, setActiveKey] = useState(workoutList[0]?.key || null)
   const [exByWorkout, setExByWorkout] = useState({}) // workoutKey -> exercises[]
   const [expanded, setExpanded] = useState(null)      // exercise id

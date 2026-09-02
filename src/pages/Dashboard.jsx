@@ -155,7 +155,7 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
         <p className="text-xs font-ui font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-2)', letterSpacing: '0.1em' }}>
           Escolha seu treino
         </p>
-        {Object.values(workouts).map(w => (
+        {Object.values(workouts).filter(w => !w.archived).map(w => (
           <WorkoutCard
             key={w.key}
             workout={w}
@@ -166,7 +166,7 @@ export default function Dashboard({ profile, onStartWorkout, onBack }) {
                 style={{ width: 48, height: 48, background: 'var(--accent-dim)' }}
               >
                 <span className="font-display font-bold text-xl" style={{ color: 'var(--accent)' }}>
-                  {w.label.split(' ')[1]}
+                  {w.badge || w.label.split(' ')[1]}
                 </span>
               </div>
             }

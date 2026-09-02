@@ -15,7 +15,7 @@ export const PROFILES = [
     name: 'Nicole',
     split: 'ABCD',
     objective: 'Glúteos e posterior',
-    objectiveDetail: 'Ciclo do personal: 3 treinos de inferiores glúteo-dominantes + 1 de superiores, que repete 2× na semana. Séries em pirâmide (carga sobe a cada série, a última é pesada), bi-sets emendados sem descanso e dropset no fim do D. Ordem: A → B → C → B → D.',
+    objectiveDetail: 'Ciclo do personal: 2 treinos de inferiores (glúteos, posterior e VMO) + 1 de superiores com HIIT. Extensora unilateral em 0°–30° nos dois inferiores, para puxar o VMO. Alterna Inferior A e Inferior B, com o de superiores entre eles.',
   },
   {
     key: 'jo',
@@ -33,10 +33,12 @@ const jeffWorkouts = {
 }
 
 const nicoleWorkouts = {
-  treino_a: { key: 'treino_a', label: 'Treino A', focus: 'Posterior de Coxa e Glúteos', tag: 'Glutes' },
-  treino_b: { key: 'treino_b', label: 'Treino B', focus: 'Superiores + HIIT (2× na semana)', tag: 'Upper' },
-  treino_c: { key: 'treino_c', label: 'Treino C', focus: 'Quadríceps e Glúteos',        tag: 'Legs' },
-  treino_d: { key: 'treino_d', label: 'Treino D', focus: 'Glúteos',                     tag: 'Glutes' },
+  treino_a: { key: 'treino_a', label: 'Inferior A', badge: 'A', focus: 'Glúteos, Posterior e VMO',         tag: 'Glutes' },
+  treino_b: { key: 'treino_b', label: 'Superiores', badge: 'S', focus: 'Superiores + HIIT (2× na semana)', tag: 'Upper' },
+  treino_c: { key: 'treino_c', label: 'Inferior B', badge: 'B', focus: 'Glúteos, Posterior e VMO',         tag: 'Legs' },
+  // Saiu no ciclo 3 (eram 3 treinos de perna, agora são 2). Fica aqui só
+  // para o histórico antigo mostrar "Treino D" em vez do workout_key cru.
+  treino_d: { key: 'treino_d', label: 'Treino D', badge: 'D', focus: 'Glúteos', tag: 'Glutes', archived: true },
 }
 
 const grupoWorkouts = {
